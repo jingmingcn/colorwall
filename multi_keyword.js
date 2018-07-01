@@ -42,7 +42,7 @@ $(function(){
 	//var keyword = 'temporal,spatial';
 	//var keyword = '';
 
-	if (!keyword) keyword = 'flow';
+	if (!keyword) keyword = '';
 	if (!year_from) year_from = 1990;
 	if (!year_to) year_to = 2016;
 	if (!threshold) threshold = 4;
@@ -64,7 +64,10 @@ $(function(){
 		'keyword':keyword,
 		'topKeyword':topKeywords[0],
 		'filter_year_from':year_from,
-		'filter_year_to':year_to
+		'filter_year_to':year_to,
+		'node_name':'',
+		'node_value':0,
+		'node_rel':0
 	};
 
 	var svg;
@@ -96,7 +99,7 @@ $(function(){
 	var w = +preferences['width'],
 		h = +preferences['height'];
 	var force  = d3.layout.forceInABox()
-				    .size([w, h])
+				    .size([w, h-50])
 				    .treemapSize([w-300, h-300])
 				    .enableGrouping(true)
 				    .linkDistance(preferences['link_distance'])
@@ -105,6 +108,8 @@ $(function(){
 				    .linkStrengthInterCluster(0.05)
 				    .gravityToFoci(0.35)
 				    .charge(-350);
+
+
 
 	d3.csv(url,function(error,mdata){
 		if(error) throw error;
@@ -163,7 +168,7 @@ $(function(){
 	    		return;
 	    	}
 
-	    	if(keyword.split(',').length>0){
+	    	if(keyword && keyword.split(',').length>0){
 		    	found = false;
 		    	keyword.split(',').forEach(function(t){
 		    		if(text.indexOf(t)){
@@ -266,26 +271,44 @@ $(function(){
 		
 		var edge = preferences['node_edge_size'];
 
-		svg = d3.select("body").append("svg").attr("width",preferences['width']).attr("height",preferences['height']);
-		
+		svg = d3.select("body").append("svg").attr("class","svg_main").attr("width",preferences['width']).attr("height",preferences['height']-50);
+		svg_bottom = d3.select("body").append("svg").attr("class","svg_bottom").attr("width",preferences['width']).attr("height",50).attr("top",preferences['height']-50);
+
 		var x = d3.scale.ordinal().rangeBands([0, preferences['link_distance']-preferences['node_radius']*2],0.01);
 		x.domain(new Array(preferences['seq_size']).fill(0).map(function(currentValue,index,array){return index;}));
 		var color = d3.scale.ordinal().range(colorbrewer.Reds[9]).domain([0,preferences['seq_max']]);
 
 		var sequentialScale = d3v4.scaleSequential(d3v4.interpolateReds).domain([0,preferences['seq_max']]);
+		var sequentialScaleNode = d3v4.scaleSequential(d3v4.interpolatePurples).domain([0,500]);
 		//var sequentialScale = d3v4.scaleSequential(d3v4.interpolateWarm).domain([0,preferences['seq_max']]);
-		svg.append("g")
+		svg_bottom.append("g")
 			.attr("class", "legendSequential")
 			.attr("transform", "translate(5,5)");
 			//.attr("transform", "translate("+($(window).width()-300)+","+($(window).height()-40)+")");
+		
+		svg_bottom.append("g")
+			.attr("class", "legendSequentialNode")
+			//.attr("transform", "translate(5,5)");
+			.attr("transform", "translate("+($(window).width()-480)+",5)");
+		
+
 		var legendSequential = d3.legend.color()
 		    .shapeWidth(30)
 		    .cells(preferences['seq_max']+1)
 		    .orient("horizontal")
 		    .scale(sequentialScale);
 
-		svg.select(".legendSequential")
+		var legendSequentialNode = d3.legend.color()
+		    .shapeWidth(40)
+		    .cells(11)
+		    .orient("horizontal")
+		    .scale(sequentialScaleNode);
+
+		svg_bottom.select(".legendSequential")
 		  .call(legendSequential);
+
+		svg_bottom.select(".legendSequentialNode")
+		  .call(legendSequentialNode);
 
 		path = svg.selectAll(".area").data(data.links).enter().append('g').attr("class","area")
 			.each(function(d,i){
@@ -311,6 +334,9 @@ $(function(){
 			// 	return rScale(d.value);
 			// })
 			.style('stroke-width',edge/1)
+			.style('fill',function(d){
+				return sequentialScaleNode(d.value);
+			})
 			.on('mouseover',function(d,i){
 				d3.select(this).style('stroke',"blue");
 			}).on('mouseout',function(d,i){
