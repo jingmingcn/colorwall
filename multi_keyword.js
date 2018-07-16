@@ -47,6 +47,8 @@ $(function(){
 	if (!year_to) year_to = 2016;
 	if (!threshold) threshold = 4;
 
+	var margin = {top: -5, right: -5, bottom: -5, left: -5};
+
 	var	preferences = {
 		'link_distance': 150,
 		'node_radius': 10,
@@ -59,8 +61,8 @@ $(function(){
 		'seq_max':Number.MIN_VALUE,
 		'seq_size':0,
 		'seq_threshold': parseInt(threshold),
-		'width':$(window).width(),
-		'height':$(window).height(),
+		'width':$(window).width()- margin.left - margin.right,
+		'height':$(window).height()- margin.top - margin.bottom,
 		'keyword':keyword,
 		'topKeyword':topKeywords[0],
 		'filter_year_from':year_from,
@@ -70,7 +72,7 @@ $(function(){
 		'node_rel':0
 	};
 
-	var svg;
+	var svg,container;
 	var nodes;
 	var labels;
 	var links;
@@ -98,6 +100,7 @@ $(function(){
 
 	var w = +preferences['width'],
 		h = +preferences['height'];
+
 	var force  = d3.layout.forceInABox()
 				    .size([w, h-50])
 				    .treemapSize([w-300, h-300])
@@ -108,6 +111,37 @@ $(function(){
 				    .linkStrengthInterCluster(0.05)
 				    .gravityToFoci(0.35)
 				    .charge(-350);
+
+	var zoom = d3.behavior.zoom()
+	    .scaleExtent([0.1, 10])
+	    .on("zoom", zoomed);
+
+	var drag = d3.behavior.drag()
+	    .origin(function(d) { return d; })
+	    .on("dragstart", dragstarted)
+	    .on("drag", dragged)
+	    .on("dragend", dragended);
+
+    function zoomed() {
+	  container.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+	}
+
+	function dragstarted(d) {
+	  d3.event.sourceEvent.stopPropagation();
+	  d3.select(this).classed("dragging", true);
+	  if(this.class == 'node'){
+	  	d3.select(this).classed("fixed", d.fixed = true);
+	  }
+	  
+	}
+
+	function dragged(d) {
+	  d3.select(this).attr("cx", d.x = d3.event.x).attr("cy", d.y = d3.event.y);
+	}
+
+	function dragended(d) {
+	  d3.select(this).classed("dragging", false);
+	}
 
 
 
@@ -247,6 +281,16 @@ $(function(){
 
 	    data =  {"nodes":nodeArray, "links":edges};
 
+	    netClustering.cluster(data.nodes, data.links);
+
+		console.log(data.links.length);
+
+		data.links = data.links.filter(function(element,index,array){
+			return element.source.cluster == element.target.cluster;
+		});
+
+		console.log(data.links.length);
+
 		$.each(data.nodes,function(index_node,item_node){
 			item_node.size = 0;
 			$.each(data.links,function(index_link,item_link){
@@ -257,6 +301,8 @@ $(function(){
 				}
 			});
 		});
+
+
 
 		nodeValueMax = d3.max(data.nodes, function (d) { return d.value; } );
 		nodeValueMin = d3.min(data.nodes, function (d) { return d.value; } );
@@ -271,8 +317,25 @@ $(function(){
 		
 		var edge = preferences['node_edge_size'];
 
-		svg = d3.select("body").append("svg").attr("class","svg_main").attr("width",preferences['width']).attr("height",preferences['height']-50);
+		svg = d3.select("body")
+			.append("svg").attr("class","svg_main")
+			.attr("width",preferences['width']+ margin.left + margin.right)
+			.attr("height",preferences['height']-50 + margin.top + margin.bottom)
+			.append("g")
+		    .attr("transform", "translate(" + margin.left + "," + margin.right + ")")
+		    .call(zoom);
+
+		var rect = svg.append("rect")
+		    .attr("width", w)
+		    .attr("height", h)
+		    .style("fill", "none")
+		    .style("pointer-events", "all");
+
+		container = svg.append("g");
+
 		svg_bottom = d3.select("body").append("svg").attr("class","svg_bottom").attr("width",preferences['width']).attr("height",50).attr("top",preferences['height']-50);
+
+		
 
 		var x = d3.scale.ordinal().rangeBands([0, preferences['link_distance']-preferences['node_radius']*2],0.01);
 		x.domain(new Array(preferences['seq_size']).fill(0).map(function(currentValue,index,array){return index;}));
@@ -310,7 +373,7 @@ $(function(){
 		svg_bottom.select(".legendSequentialNode")
 		  .call(legendSequentialNode);
 
-		path = svg.selectAll(".area").data(data.links).enter().append('g').attr("class","area")
+		path = container.selectAll(".area").data(data.links).enter().append('g').attr("class","area")
 			.each(function(d,i){
 				ld = d;
 				d3.select(this).selectAll('.rect').data(d.seq).enter().insert('rect').attr('class','rect')
@@ -323,9 +386,9 @@ $(function(){
 					.attr('stroke',function(d,i){return color(d/preferences['seq_max']);});
 			});
 
-		links = svg.selectAll(".link").data(data.links).enter().insert("path").attr("class","link");
+		links = container.selectAll(".link").data(data.links).enter().insert("path").attr("class","link");
 
-		nodes = svg.selectAll(".node").data(data.nodes).enter().append("circle","svg").attr("class","node")
+		nodes = container.selectAll(".node").data(data.nodes).enter().append("circle","svg").attr("class","node")
 			//.attr("r",preferences['node_radius'])
 			.attr("r",function(d){
 				return nodeRadiusScale(d);
@@ -345,14 +408,14 @@ $(function(){
 
 
 		
-		circleCenters = svg.selectAll('.circleCenter').data(data.links).enter().insert('circle').attr('class','circleCenter').attr('r',0).style('stroke-width','0px');
+		circleCenters = container.selectAll('.circleCenter').data(data.links).enter().insert('circle').attr('class','circleCenter').attr('r',0).style('stroke-width','0px');
 
-		labels = svg.selectAll('.label_').data(data.nodes).enter().append('text').attr('class','label_').text(function(d,i){return d.name;}).style('z-index',1);
+		labels = container.selectAll('.label_').data(data.nodes).enter().append('text').attr('class','label_').text(function(d,i){return d.name;}).style('z-index',1);
 
 		console.log(data.nodes.length);
 		console.log(labels.size());
 
-		netClustering.cluster(data.nodes, data.links);
+		
 
 		force.stop();
 		force
@@ -363,8 +426,8 @@ $(function(){
 		    .on("end",end)
 		    .start();
 
-		var drag = force.drag().on("dragstart", dragstart);
-		svg.selectAll(".node").on("dblclick", dblclick).call(drag);
+		//var drag = force.drag().on("dragstart", dragstart);
+		container.selectAll(".node").on("dblclick", dblclick).call(drag);
 
 		//force.drawTreemap(svg);
 
@@ -547,14 +610,6 @@ $(function(){
 	function dblclick(d) {
   d3.select(this).classed("fixed", d.fixed = false);
 }
-
-function dragstart(d) {
-	console.log(d3.select(this));
-  d3.select(this).classed("fixed", d.fixed = true);
-}
-
-
-
 
 	$(window).resize(function(){
 		var width = $(window).width();
