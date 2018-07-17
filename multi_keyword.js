@@ -48,6 +48,8 @@ $(function(){
 	if (!threshold) threshold = 4;
 
 	var margin = {top: -5, right: -5, bottom: -5, left: -5};
+	var window_width = $(window).width(),
+		window_height = $(window).height();
 
 	var	preferences = {
 		'link_distance': 150,
@@ -92,7 +94,7 @@ $(function(){
 	var template = "treemap";
 	var nodeValueMax,nodeValueMin;
 
-	var rScale = d3.scale.pow().range([4, 20]);
+	var rScale = d3.scale.log().range([4, 20]);
 	var yScale = d3.scale.linear().range([preferences['height']-20, 20]);
 	var xScale = d3.scale.linear().domain(["a".charCodeAt(0), "z".charCodeAt(0)]).range([0, preferences['width']]);
 	//var colScale = d3.schemeCategory20();
@@ -129,7 +131,7 @@ $(function(){
 	function dragstarted(d) {
 	  d3.event.sourceEvent.stopPropagation();
 	  d3.select(this).classed("dragging", true);
-	  if(this.class == 'node'){
+	  if(d3.select(this).attr('class') == 'node'){
 	  	d3.select(this).classed("fixed", d.fixed = true);
 	  }
 	  
@@ -139,8 +141,14 @@ $(function(){
 	  d3.select(this).attr("cx", d.x = d3.event.x).attr("cy", d.y = d3.event.y);
 	}
 
+	var end;
+
 	function dragended(d) {
 	  d3.select(this).classed("dragging", false);
+	  console.log(d3.select(this).attr('class'))
+	  if(d3.select(this).attr('class') == "node"){
+	  	end();
+	  }
 	}
 
 
@@ -319,30 +327,28 @@ $(function(){
 
 		svg = d3.select("body")
 			.append("svg").attr("class","svg_main")
-			.attr("width",preferences['width']+ margin.left + margin.right)
-			.attr("height",preferences['height']-50 + margin.top + margin.bottom)
+			.attr("width",window_width)
+			.attr("height",window_height-50)
 			.append("g")
 		    .attr("transform", "translate(" + margin.left + "," + margin.right + ")")
 		    .call(zoom);
 
 		var rect = svg.append("rect")
-		    .attr("width", w)
-		    .attr("height", h)
+		    .attr("width", window_width)
+		    .attr("height", window_height-50)
 		    .style("fill", "none")
 		    .style("pointer-events", "all");
 
 		container = svg.append("g");
 
-		svg_bottom = d3.select("body").append("svg").attr("class","svg_bottom").attr("width",preferences['width']).attr("height",50).attr("top",preferences['height']-50);
-
-		
+		svg_bottom = d3.select("body").append("svg").attr("class","svg_bottom").attr("width",window_width).attr("height",50).attr("top",window_height-50);
 
 		var x = d3.scale.ordinal().rangeBands([0, preferences['link_distance']-preferences['node_radius']*2],0.01);
 		x.domain(new Array(preferences['seq_size']).fill(0).map(function(currentValue,index,array){return index;}));
 		var color = d3.scale.ordinal().range(colorbrewer.Reds[9]).domain([0,preferences['seq_max']]);
 
 		var sequentialScale = d3v4.scaleSequential(d3v4.interpolateReds).domain([0,preferences['seq_max']]);
-		var sequentialScaleNode = d3v4.scaleSequential(d3v4.interpolatePurples).domain([0,500]);
+		var sequentialScaleNode = d3v4.scaleSequential(d3v4.interpolateSpectral).domain([0,Math.ceil(nodeValueMax/10)*10]);
 		//var sequentialScale = d3v4.scaleSequential(d3v4.interpolateWarm).domain([0,preferences['seq_max']]);
 		svg_bottom.append("g")
 			.attr("class", "legendSequential")
@@ -352,7 +358,7 @@ $(function(){
 		svg_bottom.append("g")
 			.attr("class", "legendSequentialNode")
 			//.attr("transform", "translate(5,5)");
-			.attr("transform", "translate("+($(window).width()-480)+",5)");
+			.attr("transform", "translate("+($(window).width()-980)+",5)");
 		
 
 		var legendSequential = d3.legend.color()
@@ -363,7 +369,7 @@ $(function(){
 
 		var legendSequentialNode = d3.legend.color()
 		    .shapeWidth(40)
-		    .cells(11)
+		    .cells(21)
 		    .orient("horizontal")
 		    .scale(sequentialScaleNode);
 
@@ -556,7 +562,7 @@ $(function(){
 
 	};
 
-	var end = function(e){
+	end = function(e){
 			labels.attr('dx',function(d){return d.x-5;}).attr('dy',function(d){return d.y+6;})
 			
 			links.each(function(d){
@@ -608,8 +614,8 @@ $(function(){
 	}
 
 	function dblclick(d) {
-  d3.select(this).classed("fixed", d.fixed = false);
-}
+  		d3.select(this).classed("fixed", d.fixed = false);
+	}
 
 	$(window).resize(function(){
 		var width = $(window).width();
