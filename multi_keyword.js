@@ -348,7 +348,7 @@ $(function(){
 		var color = d3.scale.ordinal().range(colorbrewer.Reds[9]).domain([0,preferences['seq_max']]);
 
 		var sequentialScale = d3v4.scaleSequential(d3v4.interpolateReds).domain([0,preferences['seq_max']]);
-		var sequentialScaleNode = d3v4.scaleSequential(d3v4.interpolateSpectral).domain([0,Math.ceil(nodeValueMax/10)*10]);
+		var sequentialScaleNode = d3v4.scaleSequential(d3v4.interpolatePurples).domain([0,Math.ceil(nodeValueMax/20)*20]);
 		//var sequentialScale = d3v4.scaleSequential(d3v4.interpolateWarm).domain([0,preferences['seq_max']]);
 		svg_bottom.append("g")
 			.attr("class", "legendSequential")
@@ -358,17 +358,19 @@ $(function(){
 		svg_bottom.append("g")
 			.attr("class", "legendSequentialNode")
 			//.attr("transform", "translate(5,5)");
-			.attr("transform", "translate("+($(window).width()-980)+",5)");
+			.attr("transform", "translate("+($(window).width()-680)+",5)");
 		
 
 		var legendSequential = d3.legend.color()
+			.labelFormat(x=>Math.round(x))
 		    .shapeWidth(30)
 		    .cells(preferences['seq_max']+1)
 		    .orient("horizontal")
 		    .scale(sequentialScale);
 
 		var legendSequentialNode = d3.legend.color()
-		    .shapeWidth(40)
+			.labelFormat(x=>Math.round(x))
+		    .shapeWidth(30)
 		    .cells(21)
 		    .orient("horizontal")
 		    .scale(sequentialScaleNode);
