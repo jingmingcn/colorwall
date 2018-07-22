@@ -128,20 +128,25 @@ $(function(){
 	  container.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
 	}
 
+	var end;
 	function dragstarted(d) {
 	  d3.event.sourceEvent.stopPropagation();
 	  d3.select(this).classed("dragging", true);
 	  if(d3.select(this).attr('class') == 'node'){
 	  	d3.select(this).classed("fixed", d.fixed = true);
+	  	end();
 	  }
 	  
 	}
 
 	function dragged(d) {
 	  d3.select(this).attr("cx", d.x = d3.event.x).attr("cy", d.y = d3.event.y);
+	  if(d3.select(this).attr('class') == "node"){
+	  	end();
+	  }
 	}
 
-	var end;
+	
 
 	function dragended(d) {
 	  d3.select(this).classed("dragging", false);
@@ -359,7 +364,7 @@ $(function(){
 			.attr("class", "legendSequentialNode")
 			//.attr("transform", "translate(5,5)");
 			.attr("transform", "translate("+($(window).width()-680)+",5)");
-		
+
 
 		var legendSequential = d3.legend.color()
 			.labelFormat(x=>Math.round(x))
@@ -391,7 +396,8 @@ $(function(){
 					.attr("height", function(d) { return d3.min([nodeRadiusScale(ld.source),nodeRadiusScale(ld.target)]); })
 					.attr('fill',function(d,i){return color(d/preferences['seq_max']);})
 					//.attr('fill',function(d,i){return sequentialScale(preferences['seq_max']-d);})
-					.attr('stroke',function(d,i){return color(d/preferences['seq_max']);});
+					//.attr('stroke',function(d,i){return color(d/preferences['seq_max']);});
+					;
 			});
 
 		links = container.selectAll(".link").data(data.links).enter().insert("path").attr("class","link");
@@ -595,13 +601,20 @@ $(function(){
 		      	var center = d.center;
 
 		      	var min_r = d3.min([nodeRadiusScale(d.source),nodeRadiusScale(d.target)]);
+		      	var max_r = d3.max([nodeRadiusScale(d.source),nodeRadiusScale(d.target)]);
 
 		      	var radians = Math.atan2(-(source.y-center.y),(source.x-center.x));
 		      	var degrees = radians * 180/Math.PI;
+
+		      	var degree_margin = Math.atan2(max_r,dr)*180/Math.PI;
+
 		    	d3.select(this).selectAll('.rect').each(function(s,i){
+		    		area_width = (dr-max_r*2)/preferences['seq_size'];
 		    		d3.select(this).attr('x',center.x).attr('y',center.y)
+		    			.attr('width',area_width)
 		    			.attr('transform',function(){
-			    			degree = -degrees+100+(40/preferences['seq_size'])*(i+1);
+			    			//degree = -degrees+90+degree_margin+(60-degree_margin*2)*i;
+			    			degree = -degrees+90+degree_margin+((60-degree_margin*2)/preferences['seq_size'])*(i);
 			    			return 'rotate('+degree+' '+center.x+' '+center.y+') translate('+-d3.select(this).attr('width')/2+','+-(dr+min_r+1)+')';
 			    		});
 		    	});
