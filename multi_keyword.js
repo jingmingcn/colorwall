@@ -573,7 +573,7 @@ $(function(){
 	};
 
 	end = function(e){
-			labels.attr('dx',function(d){return d.x-5;}).attr('dy',function(d){return d.y+6;})
+			labels.attr('dx',function(d){return d.x-5;}).attr('dy',function(d){return d.y+6+nodeRadiusScale(d);})
 			
 			links.each(function(d){
 				d.center = circleCenter(d.source.x,d.source.y,d.target.x,d.target.y,60);
@@ -616,7 +616,7 @@ $(function(){
 		    			.attr('width',area_width)
 		    			.attr('transform',function(){
 			    			//degree = -degrees+90+degree_margin+(60-degree_margin*2)*i;
-			    			degree = -degrees+90+degree_margin+((60-degree_margin*2)/preferences['seq_size'])*(i);
+			    			degree = -degrees+90+degree_margin+((60-degree_margin*2)/preferences['seq_size'])*(i)+(60-degree_margin*2)/2/preferences['seq_size'];
 			    			return 'rotate('+degree+' '+center.x+' '+center.y+') translate('+-d3.select(this).attr('width')/2+','+-(dr+min_r+1)+')';
 			    		});
 		    	});
