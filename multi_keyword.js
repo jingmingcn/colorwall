@@ -49,7 +49,7 @@ $(function(){
 	if (!keyword)		keyword 		= 	'';
 	if (!year_from)		year_from 		= 	1990;
 	if (!year_to)		year_to 		= 	2016;
-	if (!threshold)		threshold 		= 	4;
+	if (!threshold)		threshold 		= 	10;
 	if (!node_r_min)	node_r_min 		= 	2;
 	if (!node_r_max)	node_r_max 		= 	20;
 	if (!link_distance)	link_distance	=	150;
