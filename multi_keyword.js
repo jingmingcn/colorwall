@@ -450,7 +450,7 @@ $(function(){
 
 				titles = titles.slice(0,4);
 				titles.forEach(v=>{
-					t += '<span class="year">'+v.year+'</span>'+':'+v.title+'</br>';
+					t += '<div style="white-space: nowrap;"><span class="year">'+v.year+'</span>'+':'+v.title+'</br></div>';
 				});
 
 
