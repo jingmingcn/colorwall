@@ -229,7 +229,7 @@ $(function(){
 	    	if(keyword && keyword.split(',').length>0){
 		    	found = false;
 		    	keyword.split(',').forEach(function(t){
-		    		if(text.indexOf(t)){
+		    		if(text.indexOf(t)>0){
 		    			found = true;
 		    		}
 		    	});
