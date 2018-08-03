@@ -517,13 +517,13 @@ $(function(){
 		layout_folder.add(preferences,'node_radius_min',1,10).step(1).name('Node R. Min').onFinishChange(function(value){
 			if(value!=node_r_min){
 				uri = window.location.href;
-				window.location.href = updateQueryStringParameter(uri, 'node_radius_min', value);
+				window.location.href = updateQueryStringParameter(uri, 'node_r_min', value);
 			}
 		});
 		layout_folder.add(preferences,'node_radius_max',10,40).step(1).name('Node R. Max').onFinishChange(function(value){
 			if(value!=node_r_max){
 				uri = window.location.href;
-				window.location.href = updateQueryStringParameter(uri, 'node_radius_max', value);
+				window.location.href = updateQueryStringParameter(uri, 'node_r_max', value);
 			}
 		});
 		
