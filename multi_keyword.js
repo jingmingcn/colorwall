@@ -32,30 +32,39 @@ $(function(){
 	var year_from = getParameterByName('year_from');
 	var year_to = getParameterByName('year_to');
 	var threshold = getParameterByName('threshold');
+	var node_r_min = getParameterByName('node_r_min');
+	var node_r_max = getParameterByName('node_r_max');
+	var link_distance = getParameterByName('link_distance');
+	var force_charge = getParameterByName('force_charge');
 
 
 	console.log(document.implementation.hasFeature("http://www.w3.org/TR/SVG2/feature#GraphicsAttribute", 2.0));
 
-	var data;
+	var data,mdata;
 	const url = "IEEE VIS papers 1990-2016 - Main dataset.csv";
 	const topKeywords = ["visualization", "data", "interactive", "volume", "analysis", "exploring", "rendering", "analytical", "information", "surface"];
 	//var keyword = 'temporal,spatial';
 	//var keyword = '';
 
-	if (!keyword) keyword = '';
-	if (!year_from) year_from = 1990;
-	if (!year_to) year_to = 2016;
-	if (!threshold) threshold = 4;
+	if (!keyword)		keyword 		= 	'';
+	if (!year_from)		year_from 		= 	1990;
+	if (!year_to)		year_to 		= 	2016;
+	if (!threshold)		threshold 		= 	4;
+	if (!node_r_min)	node_r_min 		= 	2;
+	if (!node_r_max)	node_r_max 		= 	20;
+	if (!link_distance)	link_distance	=	150;
+	if (!force_charge)	force_charge	= 	-200;
 
 	var margin = {top: -5, right: -5, bottom: -5, left: -5};
 	var window_width = $(window).width(),
 		window_height = $(window).height();
 
 	var	preferences = {
-		'link_distance': 150,
-		'node_radius': 10,
+		'link_distance': parseInt(link_distance),
+		'node_radius_min': parseInt(node_r_min),
+		'node_radius_max': parseInt(node_r_max),
 		'node_edge_size': 2,
-		'many_body_strength': -1,
+		'force_charge': parseInt(force_charge),
 		'toggle_label': true,
 		'year_from':Number.MAX_VALUE,
 		'year_to':Number.MIN_VALUE,
@@ -112,7 +121,7 @@ $(function(){
 				    .linkStrengthInsideCluster(0.3)
 				    .linkStrengthInterCluster(0.05)
 				    .gravityToFoci(0.35)
-				    .charge(-350);
+				    .charge(force_charge);
 
 	var zoom = d3.behavior.zoom()
 	    .scaleExtent([0.1, 10])
@@ -158,8 +167,10 @@ $(function(){
 
 
 
-	d3.csv(url,function(error,mdata){
+	d3.csv(url,function(error,rawdata){
 		if(error) throw error;
+
+		mdata = rawdata;
 
 		var nodeArray = [], edges = [];
 	    var nodesMap = d3.map();
@@ -366,6 +377,11 @@ $(function(){
 			//.attr("transform", "translate(5,5)");
 			.attr("transform", "translate("+($(window).width()-680)+",5)");
 
+		// Define the div for the tooltip
+		var div = d3.select("body").append("div")	
+		    .attr("class", "tooltip")				
+		    .style("opacity", 0);
+
 
 		var legendSequential = d3.legend.color()
 			.labelFormat(x=>Math.round(x))
@@ -418,8 +434,37 @@ $(function(){
 			})
 			.on('mouseover',function(d,i){
 				d3.select(this).style('stroke',"blue");
+
+				var titles = mdata.filter(v=>{
+			    	return v["Author Names"].indexOf(d.id)>=0;
+				}).map(v=>{
+					return {'title':v['Paper Title'],'year':v['Year']};
+				});
+				
+				var t = '';
+				titles.sort((a,b)=>{
+					var i = a['year'];
+					var j = b['year'];
+					return j-i;
+				});
+
+				titles = titles.slice(0,4);
+				titles.forEach(v=>{
+					t += '<span class="year">'+v.year+'</span>'+':'+v.title+'</br>';
+				});
+
+
+				div.transition()		
+	                .duration(200)		
+	                .style("opacity", .9);		
+	            div	.html(t)	
+	                .style("left", (d3.event.pageX) + "px")		
+	                .style("top", (d3.event.pageY - 28) + "px");	
 			}).on('mouseout',function(d,i){
 				d3.select(this).style('stroke',"white");
+				div.transition()		
+	                .duration(500)		
+	                .style("opacity", 0);	
 			});
 
 
@@ -458,17 +503,30 @@ $(function(){
 		content_folder.add(preferences,'topKeyword',topKeywords).name('Top '+topKeywords.length+' Keywords');
 		var layout_folder = gui.addFolder('Layout Preferences');
 		layout_folder.add(preferences,'link_distance',50,200).step(10).name('Link Distance').onFinishChange(function(value){
-
+			if(value!=link_distance){
+				uri = window.location.href;
+				window.location.href = updateQueryStringParameter(uri, 'link_distance', value);
+			}
 		});
-		layout_folder.add(preferences,'many_body_strength',-100,-10).step(10).name('ManyBodyStrength').onFinishChange(function(value){
-			simulation.alpha(0.5).restart();
+		layout_folder.add(preferences,'force_charge',-300,-100).step(-10).name('Force Charge').onFinishChange(function(value){
+			if(value!=force_charge){
+				uri = window.location.href;
+				window.location.href = updateQueryStringParameter(uri, 'force_charge', value);
+			}
 		});
-		layout_folder.add(preferences,'node_radius',2,20).step(1).name('Node Radius').onFinishChange(function(value){
+		layout_folder.add(preferences,'node_radius_min',1,10).step(1).name('Node R. Min').onFinishChange(function(value){
+			if(value!=node_r_min){
+				uri = window.location.href;
+				window.location.href = updateQueryStringParameter(uri, 'node_radius_min', value);
+			}
+		});
+		layout_folder.add(preferences,'node_radius_max',10,40).step(1).name('Node R. Max').onFinishChange(function(value){
+			if(value!=node_r_max){
+				uri = window.location.href;
+				window.location.href = updateQueryStringParameter(uri, 'node_radius_max', value);
+			}
+		});
 		
-		});
-		layout_folder.add(preferences,'node_edge_size',0,4).step(1).name('Stroke').onFinishChange(function(value){
-		
-		});
 
 		var dataset_folder = gui.addFolder('Dataset Statistics');
 		
@@ -486,8 +544,8 @@ $(function(){
 			}		
 		});
 		//dataset_folder.add(preferences,'seq_size').name('(Seq) Size').listen();
-		dataset_folder.add(preferences,'seq_max').name('(Seq) Maximum').listen();
-		dataset_folder.add(preferences,'seq_min').name('(Seq) Minimum').listen();
+		//dataset_folder.add(preferences,'seq_max').name('(Seq) Maximum').listen();
+		//dataset_folder.add(preferences,'seq_min').name('(Seq) Minimum').listen();
 		dataset_folder.add(preferences,'seq_threshold',1,20).step(1).name('(Seq) Threshold').listen().onFinishChange(function(value){
 			if(value!=threshold){
 				uri = window.location.href;
@@ -496,7 +554,7 @@ $(function(){
 		});
 
 		content_folder.open();
-		//layout_folder.open();
+		layout_folder.open();
 		dataset_folder.open();
 
 		/**
@@ -624,8 +682,8 @@ $(function(){
 	}
 
 	var nodeRadiusScale = function(d){
-		a = 10.0;//
-		b = 4.0;//Base Radius
+		a = node_r_max;//
+		b = node_r_min;//Base Radius
 		//return (1+a/(1+Math.pow(Math.E,1+d.value/nodeValueMax)))*b;
 		return b+(a*(d.value-nodeValueMin)/(nodeValueMax-nodeValueMin));
 	}
