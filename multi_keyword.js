@@ -51,7 +51,7 @@ $(function(){
 	if (!year_to)		year_to 		= 	2016;
 	if (!threshold)		threshold 		= 	10;
 	if (!node_r_min)	node_r_min 		= 	2;
-	if (!node_r_max)	node_r_max 		= 	20;
+	if (!node_r_max)	node_r_max 		= 	24;
 	if (!link_distance)	link_distance	=	150;
 	if (!force_charge)	force_charge	= 	-200;
 
@@ -359,7 +359,7 @@ $(function(){
 
 		svg_bottom = d3.select("body").append("svg").attr("class","svg_bottom").attr("width",window_width).attr("height",50).attr("top",window_height-50);
 
-		var x = d3.scale.ordinal().rangeBands([0, preferences['link_distance']-preferences['node_radius']*2],0.01);
+		var x = d3.scale.ordinal().rangeBands([0, preferences['link_distance']-preferences['node_radius_min']*2],0.01);
 		x.domain(new Array(preferences['seq_size']).fill(0).map(function(currentValue,index,array){return index;}));
 		var color = d3.scale.ordinal().range(colorbrewer.Reds[9]).domain([0,preferences['seq_max']]);
 
@@ -594,7 +594,7 @@ $(function(){
 			x2 = d.target.x,
 			y2 = d.target.y,
 			l  = Math.sqrt(Math.pow(y2-y1,2)+Math.pow(x2-x1,2));
-			l_  = preferences['node_radius']/1 + preferences['edge_size']/1;
+			l_  = preferences['node_radius_min']/1 + preferences['edge_size']/1;
 		var x1_ = x1 + l_*(x2-x1)/l,
 			y1_ = y1 + l_*(y2-y1)/l,
 			x2_ = x2 + l_*(x1-x2)/l,
@@ -682,9 +682,10 @@ $(function(){
 	}
 
 	var nodeRadiusScale = function(d){
-		a = node_r_max;//
-		b = node_r_min;//Base Radius
+		a = parseInt(node_r_max);//
+		b = parseInt(node_r_min);//Base Radius
 		//return (1+a/(1+Math.pow(Math.E,1+d.value/nodeValueMax)))*b;
+		
 		return b+(a*(d.value-nodeValueMin)/(nodeValueMax-nodeValueMin));
 	}
 
