@@ -55,7 +55,13 @@ $(function(){
 	if (!node_r_max)	node_r_max 		= 	24;
 	if (!link_distance)	link_distance	=	150;
 	if (!force_charge)	force_charge	= 	-200;
-	if (!toggle_label)	toggle_label	= 	true;
+	if (toggle_label === 'false'){
+			toggle_label = false;
+	}else{
+		toggle_label = true;
+	}
+
+	console.log(toggle_label);
 
 	var margin = {top: -5, right: -5, bottom: -5, left: -5};
 	var window_width = $(window).width(),
@@ -67,7 +73,7 @@ $(function(){
 		'node_radius_max': parseInt(node_r_max),
 		'node_edge_size': 2,
 		'force_charge': parseInt(force_charge),
-		'toggle_label': Boolean(toggle_label),
+		'toggle_label': toggle_label,
 		'year_from':Number.MAX_VALUE,
 		'year_to':Number.MIN_VALUE,
 		'seq_min':Number.MAX_VALUE,
@@ -517,6 +523,22 @@ $(function(){
 		});
 		content_folder.add(preferences,'topKeyword',topKeywords).name('Top '+topKeywords.length+' Keywords');
 		var layout_folder = gui.addFolder('Layout Preferences');
+		layout_folder.add(preferences,'toggle_label').name('Toggle Label').onFinishChange(function(value){
+			console.log(value);
+				uri = window.location.href;
+				uri = updateQueryStringParameter(uri, 'toggle_label', value.toString());
+				window.history.pushState(null,'',uri);
+
+			if(value){
+				labels.attr('opacity',function(d){
+					return labelOpacityScale(d.value);
+				});
+			}else{
+				labels.attr('opacity',function(d){
+					return 0;
+				});
+			}
+		});
 		layout_folder.add(preferences,'link_distance',50,200).step(10).name('Link Distance').onFinishChange(function(value){
 			if(value!=link_distance){
 				uri = window.location.href;
