@@ -661,20 +661,25 @@ $(function(){
 		      	var center = d.center;
 
 		      	var min_r = d3.min([nodeRadiusScale(d.source),nodeRadiusScale(d.target)]);
-		      	var max_r = d3.max([nodeRadiusScale(d.source),nodeRadiusScale(d.target)]);
+		      	//var max_r = d3.max([nodeRadiusScale(d.source),nodeRadiusScale(d.target)]);
+
+		      	var source_r = nodeRadiusScale(d.source);
+		      	var target_r = nodeRadiusScale(d.target);
 
 		      	var radians = Math.atan2(-(source.y-center.y),(source.x-center.x));
 		      	var degrees = radians * 180/Math.PI;
 
-		      	var degree_margin = Math.atan2(max_r,dr)*180/Math.PI;
+		      	var degree_margin_source = Math.atan2(source_r,dr)*180/Math.PI;
+		      	var degree_margin_target = Math.atan2(target_r,dr)*180/Math.PI;
+		      	var degree_between = 60 - degree_margin_source - degree_margin_target;
 
 		    	d3.select(this).selectAll('.rect').each(function(s,i){
-		    		area_width = (dr-max_r*2)/preferences['seq_size'];
+		    		area_width = (dr-source_r-target_r)/preferences['seq_size'];
 		    		d3.select(this).attr('x',center.x).attr('y',center.y)
 		    			.attr('width',area_width)
 		    			.attr('transform',function(){
 			    			//degree = -degrees+90+degree_margin+(60-degree_margin*2)*i;
-			    			degree = -degrees+90+degree_margin+((60-degree_margin*2)/preferences['seq_size'])*(i)+(60-degree_margin*2)/2/preferences['seq_size'];
+			    			degree = -degrees+90+degree_margin_source+(degree_between/preferences['seq_size'])*(i)+degree_between/2/preferences['seq_size'];
 			    			return 'rotate('+degree+' '+center.x+' '+center.y+') translate('+-d3.select(this).attr('width')/2+','+-(dr+min_r+1)+')';
 			    		});
 		    	});
