@@ -104,6 +104,8 @@ $(function(){
 	var nodeValueMax,nodeValueMin;
 
 	var rScale = d3.scale.log().range([4, 20]);
+	var labelFontSizeScale = d3.scale.log().range([8,20]);
+	var labelOpacityScale = d3.scale.log().range([0.1,1])
 	var yScale = d3.scale.linear().range([preferences['height']-20, 20]);
 	var xScale = d3.scale.linear().domain(["a".charCodeAt(0), "z".charCodeAt(0)]).range([0, preferences['width']]);
 	//var colScale = d3.schemeCategory20();
@@ -333,6 +335,9 @@ $(function(){
 		rScale.domain([0, d3.max(data.nodes, function (d) { return d.value; } )]);
 		yScale.domain([0, d3.max(data.nodes, function (d) { return d.value; } )]);
 		lOpacity.domain(d3.extent(data.links, function (d) { return d.value; } ));
+
+		labelFontSizeScale.domain([d3.min(data.nodes, function (d) { return d.value; } ), d3.max(data.nodes, function (d) { return d.value; } )]);
+		labelOpacityScale.domain([d3.min(data.nodes, function (d) { return d.value; } ), d3.max(data.nodes, function (d) { return d.value; } )]);
 
 		app();
 	});
@@ -631,7 +636,14 @@ $(function(){
 	};
 
 	end = function(e){
-			labels.attr('dx',function(d){return d.x-5;}).attr('dy',function(d){return d.y+6+nodeRadiusScale(d);})
+			labels.attr('dx',function(d){return d.x-5;})
+				.attr('dy',function(d){return d.y+6+nodeRadiusScale(d);})
+				.attr('font-size',function(d){
+					return labelFontSizeScale(d.value)+'px';
+				})
+				.attr('opacity',function(d){
+					return labelOpacityScale(d.value);
+				});
 			
 			links.each(function(d){
 				d.center = circleCenter(d.source.x,d.source.y,d.target.x,d.target.y,60);
