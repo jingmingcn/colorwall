@@ -105,7 +105,7 @@ $(function(){
 
 	var rScale = d3.scale.log().range([4, 20]);
 	var labelFontSizeScale = d3.scale.log().range([8,20]);
-	var labelOpacityScale = d3.scale.log().range([0.1,1])
+	var labelOpacityScale = d3.scale.log().range([0.4,1])
 	var yScale = d3.scale.linear().range([preferences['height']-20, 20]);
 	var xScale = d3.scale.linear().domain(["a".charCodeAt(0), "z".charCodeAt(0)]).range([0, preferences['width']]);
 	//var colScale = d3.schemeCategory20();
