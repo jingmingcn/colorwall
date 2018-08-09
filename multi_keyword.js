@@ -36,6 +36,7 @@ $(function(){
 	var node_r_max = getParameterByName('node_r_max');
 	var link_distance = getParameterByName('link_distance');
 	var force_charge = getParameterByName('force_charge');
+	var toggle_label = getParameterByName('toggle_label');
 
 
 	console.log(document.implementation.hasFeature("http://www.w3.org/TR/SVG2/feature#GraphicsAttribute", 2.0));
@@ -54,6 +55,7 @@ $(function(){
 	if (!node_r_max)	node_r_max 		= 	24;
 	if (!link_distance)	link_distance	=	150;
 	if (!force_charge)	force_charge	= 	-200;
+	if (!toggle_label)	toggle_label	= 	true;
 
 	var margin = {top: -5, right: -5, bottom: -5, left: -5};
 	var window_width = $(window).width(),
@@ -65,7 +67,7 @@ $(function(){
 		'node_radius_max': parseInt(node_r_max),
 		'node_edge_size': 2,
 		'force_charge': parseInt(force_charge),
-		'toggle_label': true,
+		'toggle_label': Boolean(toggle_label),
 		'year_from':Number.MAX_VALUE,
 		'year_to':Number.MIN_VALUE,
 		'seq_min':Number.MAX_VALUE,
