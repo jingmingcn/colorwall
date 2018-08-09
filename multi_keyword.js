@@ -424,7 +424,15 @@ $(function(){
 			});
 
 		links = container.selectAll(".link").data(data.links).enter().insert("path").attr("class","link");
-		labels = container.selectAll('.label_').data(data.nodes).enter().append('text').attr('class','label_').text(function(d,i){return d.name;}).style('z-index',1);
+		labels = container.selectAll('.label_')
+			.data(data.nodes).enter().append('text').attr('class','label_')
+			.text(function(d,i){return d.name;}).style('z-index',1)
+			.attr('font-size',function(d){
+					return labelFontSizeScale(d.value)+'px';
+				})
+			.attr('opacity',function(d){
+					return labelOpacityScale(d.value);
+				});
 		nodes = container.selectAll(".node").data(data.nodes).enter().append("circle","svg").attr("class","node")
 			//.attr("r",preferences['node_radius'])
 			.attr("r",function(d){
@@ -636,14 +644,12 @@ $(function(){
 	};
 
 	end = function(e){
-			labels.attr('dx',function(d){return d.x-5;})
-				.attr('dy',function(d){return d.y+6+nodeRadiusScale(d);})
-				.attr('font-size',function(d){
-					return labelFontSizeScale(d.value)+'px';
-				})
-				.attr('opacity',function(d){
-					return labelOpacityScale(d.value);
+			labels.attr('dx',function(d){return d.x-nodeRadiusScale(d);})
+				.attr('dy',function(d){
+					
+					return d.y+this.getBBox().height+nodeRadiusScale(d);
 				});
+				
 			
 			links.each(function(d){
 				d.center = circleCenter(d.source.x,d.source.y,d.target.x,d.target.y,60);
