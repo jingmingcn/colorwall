@@ -424,7 +424,7 @@ $(function(){
 			});
 
 		links = container.selectAll(".link").data(data.links).enter().insert("path").attr("class","link");
-
+labels = container.selectAll('.label_').data(data.nodes).enter().append('text').attr('class','label_').text(function(d,i){return d.name;}).style('z-index',1);
 		nodes = container.selectAll(".node").data(data.nodes).enter().append("circle","svg").attr("class","node")
 			//.attr("r",preferences['node_radius'])
 			.attr("r",function(d){
@@ -476,7 +476,7 @@ $(function(){
 		
 		circleCenters = container.selectAll('.circleCenter').data(data.links).enter().insert('circle').attr('class','circleCenter').attr('r',0).style('stroke-width','0px');
 
-		labels = container.selectAll('.label_').data(data.nodes).enter().append('text').attr('class','label_').text(function(d,i){return d.name;}).style('z-index',1);
+		
 
 		console.log(data.nodes.length);
 		console.log(labels.size());
