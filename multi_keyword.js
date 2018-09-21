@@ -251,6 +251,10 @@ $(function(){
 	    	var author = d["Author Names"].split(";");
 	    	var year = new Number(d['Year']);
 
+	    	author.forEach(function(d){
+	    		addCount(d);
+	    	});
+
 	        author.forEach(function (t1) {
 	            author.forEach(function (t2) {
 	            	t1 = t1.trim();
@@ -260,8 +264,7 @@ $(function(){
 	                if (t1===t2) {
 	                    return;
 	                }
-	                addCount(t1);
-	                addCount(t2);
+	                
 
 	                var key = t1<t2 ? t1 + "|" + t2 : t2 + "|" + t1;
 
