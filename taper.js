@@ -70,6 +70,7 @@ $(function(){
 	var margin = {top: -5, right: -5, bottom: -5, left: -5};
 	var window_width = $(window).width(),
 		window_height = $(window).height();
+	var x,y;
 
 	var	preferences = {
 		'link_distance': parseInt(link_distance),
@@ -389,9 +390,13 @@ $(function(){
 
 		svg_bottom = d3.select("body").append("svg").attr("class","svg_bottom").attr("width",window_width).attr("height",50).attr("top",window_height-50);
 
-		var x = d3.scale.ordinal().rangeBands([0, preferences['link_distance']-preferences['node_radius_min']*2],0.01);
+		x = d3.scale.ordinal().rangeBands([0, preferences['link_distance']-preferences['node_radius_min']*2],0.01);
 		x.domain(new Array(preferences['seq_size']).fill(0).map(function(currentValue,index,array){return index;}));
 		var color = d3.scale.ordinal().range(colorbrewer.Reds[9]).domain([0,preferences['seq_max']]);
+
+		y = d3.scale.ordinal().range([10, 1]);
+		y.domain([1,preferences['seq_size']]);
+
 
 		var sequentialScale = d3v4.scaleSequential(d3v4.interpolateReds).domain([0,preferences['seq_max']]);
 		var sequentialScaleNode = d3v4.scaleSequential(d3v4.interpolateSpectral).domain([Math.ceil(nodeValueMax/20)*20,0]);
@@ -448,7 +453,7 @@ $(function(){
 					.attr('x',function(d,i){return 0;})
 					.attr('y',function(d,i){return 0;})
 					.attr("width", x.rangeBand())
-					.attr("height", function(d) { return d3.min([nodeRadiusScale(ld.source),nodeRadiusScale(ld.target)]); })
+					.attr("height", function(d,i) { return y(i); })
 					.attr('fill',function(d,i){return color(d/preferences['seq_max']);})
 					//.attr('fill',function(d,i){return sequentialScale(preferences['seq_max']-d);})
 					//.attr('stroke',function(d,i){return color(d/preferences['seq_max']);});
@@ -726,8 +731,33 @@ $(function(){
 			  });
 
 		    circleCenters.attr('cx',function(d){return d.center.x;})
-		    	.attr('cy',function(d){return d.center.y});
-		    
+				.attr('cy',function(d){return d.center.y});
+				
+
+			path.attr("transform",function(d,i){
+				var dx = d.target.x - d.source.x,
+			        dy = d.target.y - d.source.y,
+					dr = Math.sqrt(dx * dx + dy * dy);
+					
+				var source = d.source;
+				var target = d.target;
+
+				var source_r = nodeRadiusScale(d.source);
+		      	var target_r = nodeRadiusScale(d.target);
+
+				var radians = Math.atan2(-(target.y-source.y),(target.x-source.x));
+				var degrees = radians * 180/Math.PI; 
+
+				area_width = (dr-source_r-target_r)/preferences['seq_size'];
+
+				d3.select(this).selectAll('.rect').each(function(s,i){
+					d3.select(this).attr('x',area_width*i).attr('y',-(preferences['seq_size']-i)/2).attr('width',area_width).attr('height',preferences['seq_size']-i);
+				});
+				
+				return 'translate('+source.x+','+source.y+') rotate('+-degrees+') translate('+source_r+','+(-2)+')';
+			});
+		
+			/**
 		    path.each(function(d,i){
 		    	var dx = d.target.x - d.source.x,
 			        dy = d.target.y - d.source.y,
@@ -759,7 +789,8 @@ $(function(){
 			    			return 'rotate('+degree+' '+center.x+' '+center.y+') translate('+-d3.select(this).attr('width')/2+','+-(dr+min_r+1)+')';
 			    		});
 		    	});
-		    });
+			});
+			**/
 	}
 
 	var nodeRadiusScale = function(d){
