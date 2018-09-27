@@ -751,7 +751,11 @@ $(function(){
 				area_width = (dr-source_r-target_r)/preferences['seq_size'];
 
 				d3.select(this).selectAll('.rect').each(function(s,i){
-					d3.select(this).attr('x',area_width*i).attr('y',-(preferences['seq_size']-i)/2).attr('width',area_width).attr('height',preferences['seq_size']-i);
+					d3.select(this)
+					.attr('x',area_width*i)
+					.attr('y',-(preferences['seq_size']-i)/4)
+					.attr('width',area_width)
+					.attr('height',(preferences['seq_size']-i)/2);
 				});
 				
 				return 'translate('+source.x+','+source.y+') rotate('+-degrees+') translate('+source_r+','+(-2)+')';
