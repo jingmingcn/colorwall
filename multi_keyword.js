@@ -750,12 +750,14 @@ $(function(){
 		      	var degree_between = 60 - degree_margin_source - degree_margin_target;
 
 		    	d3.select(this).selectAll('.rect').each(function(s,i){
-		    		area_width = (dr-source_r-target_r)/preferences['seq_size'];
+					block_count = preferences['seq_size'] + Math.floor((preferences['seq_size']-1)/5);
+		    		area_width = (dr-source_r-target_r)/block_count;
 		    		d3.select(this).attr('x',center.x).attr('y',center.y)
 		    			.attr('width',area_width)
 		    			.attr('transform',function(){
-			    			//degree = -degrees+90+degree_margin+(60-degree_margin*2)*i;
-			    			degree = -degrees+90+degree_margin_source+(degree_between/preferences['seq_size'])*(i)+degree_between/2/preferences['seq_size'];
+							//degree = -degrees+90+degree_margin+(60-degree_margin*2)*i;
+							
+			    			degree = -degrees+90+degree_margin_source+(degree_between/block_count)*(i+Math.floor(i/5))+degree_between/2/block_count;
 			    			return 'rotate('+degree+' '+center.x+' '+center.y+') translate('+-d3.select(this).attr('width')/2+','+-(dr+min_r+1)+')';
 			    		});
 		    	});
