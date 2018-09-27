@@ -572,7 +572,7 @@ $(function(){
 				window.location.href = updateQueryStringParameter(uri, 'link_distance', value);
 			}
 		});
-		layout_folder.add(preferences,'force_charge',-300,-100).step(-10).name('Force Charge').onFinishChange(function(value){
+		layout_folder.add(preferences,'force_charge',-900,-100).step(-10).name('Force Charge').onFinishChange(function(value){
 			if(value!=force_charge){
 				uri = window.location.href;
 				window.location.href = updateQueryStringParameter(uri, 'force_charge', value);
