@@ -394,7 +394,8 @@ $(function(){
 		var color = d3.scale.ordinal().range(colorbrewer.Reds[9]).domain([0,preferences['seq_max']]);
 
 		var sequentialScale = d3v4.scaleSequential(d3v4.interpolateReds).domain([0,preferences['seq_max']]);
-		var sequentialScaleNode = d3v4.scaleSequential(d3v4.interpolateSpectral).domain([Math.ceil(nodeValueMax/20)*20,0]);
+		var sequentialScaleNode = d3v4.scaleSequential(d3v4.interpolateSpectral).domain([nodeValueMax,nodeValueMin]);
+		//var sequentialScaleNode = d3v4.scaleSequential(d3v4.interpolateSpectral).domain([Math.ceil(nodeValueMax/20)*20,0]);
 		//var sequentialScaleNode = d3v4.scaleSequential(d3v4.interpolatePurples).domain([0,Math.ceil(nodeValueMax/20)*20]);
 		//var sequentialScale = d3v4.scaleSequential(d3v4.interpolateWarm).domain([0,preferences['seq_max']]);
 		svg_bottom.append("g")
@@ -424,7 +425,7 @@ $(function(){
 			.labelFormat(x=>Math.round(x))
 		    .shapeWidth(30)
 		    .ascending(true)
-		    .cells(21)
+		    .cells(nodeValueMax-nodeValueMin<20?nodeValueMax-nodeValueMin:20)
 		    .orient("horizontal")
 		    .scale(sequentialScaleNode);
 
