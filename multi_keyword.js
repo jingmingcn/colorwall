@@ -39,6 +39,7 @@ $(function(){
 	var toggle_label = getParameterByName('toggle_label');
 	var author_name = getParameterByName('author_name');
 	var link_filter = getParameterByName('link_filter');
+	var color_sensitivity = getParameterByName('color_sensitivity');
 
 
 	console.log(document.implementation.hasFeature("http://www.w3.org/TR/SVG2/feature#GraphicsAttribute", 2.0));
@@ -64,6 +65,7 @@ $(function(){
 	}
 	if (!author_name)	author_name		=	'';
 	if (!link_filter)	link_filter		=	threshold;
+	if (!color_sensitivity)	color_sensitivity	= 	20;
 
 	console.log(toggle_label);
 
@@ -94,7 +96,8 @@ $(function(){
 		'filter_year_to':year_to,
 		'node_name':'',
 		'node_value':0,
-		'node_rel':0
+		'node_rel':0,
+		'color_sensitivity': parseInt(color_sensitivity)
 	};
 
 	var svg,container;
@@ -416,16 +419,18 @@ $(function(){
 
 		var legendSequential = d3.legend.color()
 			.labelFormat(x=>Math.round(x))
-		    .shapeWidth(30)
+			.shapeWidth(20)
+			.shapeHeight(10)
 		    .cells(preferences['seq_max']+1)
 		    .orient("horizontal")
 		    .scale(sequentialScale);
 
 		var legendSequentialNode = d3.legend.color()
 			.labelFormat(x=>Math.round(x))
-		    .shapeWidth(30)
+			.shapeWidth(20)
+			.shapeHeight(10)
 		    .ascending(true)
-		    .cells(nodeValueMax-nodeValueMin<20?nodeValueMax-nodeValueMin:20)
+		    .cells(nodeValueMax-nodeValueMin<preferences['color_sensitivity']?nodeValueMax-nodeValueMin:preferences['color_sensitivity'])
 		    .orient("horizontal")
 		    .scale(sequentialScaleNode);
 
@@ -621,6 +626,12 @@ $(function(){
 			if(value!=link_filter){
 				uri = window.location.href;
 				window.location.href = updateQueryStringParameter(uri, 'link_filter', value);
+			}
+		});
+		dataset_folder.add(preferences,'color_sensitivity',10,30).step(1).name('Color Sensitivity').listen().onFinishChange(function(value){
+			if(value!=color_sensitivity){
+				uri = window.location.href;
+				window.location.href = updateQueryStringParameter(uri, 'color_sensitivity', value);
 			}
 		});
 
