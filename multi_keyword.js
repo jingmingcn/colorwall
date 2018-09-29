@@ -456,6 +456,13 @@ $(function(){
 					.attr("width", x.rangeBand())
 					.attr("height", function(d) { return d3.min([nodeRadiusScale(ld.source),nodeRadiusScale(ld.target)]); })
 					.attr('fill',function(d,i){return color(d/preferences['seq_max']);})
+					.style('opacity',function(d,i){
+						if(d==0){
+							return 0.5;
+						}else{
+							return 0.9;
+						}
+					})
 					//.attr('fill',function(d,i){return sequentialScale(preferences['seq_max']-d);})
 					//.attr('stroke',function(d,i){return color(d/preferences['seq_max']);});
 					;
