@@ -460,7 +460,7 @@ $(function(){
 						if(d==0){
 							return 0.5;
 						}else{
-							return 0.9;
+							return 1;
 						}
 					})
 					//.attr('fill',function(d,i){return sequentialScale(preferences['seq_max']-d);})
