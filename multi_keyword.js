@@ -40,6 +40,7 @@ $(function(){
 	var author_name = getParameterByName('author_name');
 	var link_filter = getParameterByName('link_filter');
 	var color_sensitivity = getParameterByName('color_sensitivity');
+	var toggle_treemap = getParameterByName('toggle_treemap');
 
 
 	console.log(document.implementation.hasFeature("http://www.w3.org/TR/SVG2/feature#GraphicsAttribute", 2.0));
@@ -66,6 +67,12 @@ $(function(){
 	if (!author_name)	author_name		=	'';
 	if (!link_filter)	link_filter		=	threshold;
 	if (!color_sensitivity)	color_sensitivity	= 	20;
+
+	if (toggle_treemap === 'true'){
+		toggle_treemap = true;
+	}else{
+		toggle_treemap = false;
+	}
 
 	console.log(toggle_label);
 
@@ -97,7 +104,8 @@ $(function(){
 		'node_name':'',
 		'node_value':0,
 		'node_rel':0,
-		'color_sensitivity': parseInt(color_sensitivity)
+		'color_sensitivity': parseInt(color_sensitivity),
+		'toggle_treemap': toggle_treemap
 	};
 
 	var svg,container;
@@ -133,7 +141,7 @@ $(function(){
 
 	var force  = d3.layout.forceInABox()
 				    .size([w, h-50])
-				    .treemapSize([w-300, h-300])
+				    .treemapSize([w, h-50])
 				    .enableGrouping(true)
 				    .linkDistance(preferences['link_distance'])
 				    .gravityOverall(0.001)
@@ -576,6 +584,18 @@ $(function(){
 				labels.attr('opacity',function(d){
 					return 0;
 				});
+			}
+		});
+
+		layout_folder.add(preferences,'toggle_treemap').name('Toggle TreeMap').onFinishChange(function(value){
+			uri = window.location.href;
+			uri = updateQueryStringParameter(uri, 'toggle_treemap', value.toString());
+			window.history.pushState(null,'',uri);
+
+			if(value){
+				force.drawTreemap(container);
+			}else{
+				force.deleteTreemap(container);
 			}
 		});
 		

@@ -159,11 +159,11 @@ d3.layout.forceInABox = function () {
     };
 
     force.drawTreemap = function (container) {
-        container.selectAll("rect.cell").remove();
-        container.selectAll("rect.cell")
+        container.selectAll("rect.treemapcell").remove();
+        container.selectAll("rect.treemapcell")
           .data(treeMapNodes)
           .enter().append("svg:rect")
-            .attr("class", "cell")
+            .attr("class", "treemapcell")
             .attr("x", function (d) { return d.x; })
             .attr("y", function (d) { return d.y; })
             .attr("width", function (d) { return d.dx; })
@@ -173,8 +173,7 @@ d3.layout.forceInABox = function () {
     };
 
     force.deleteTreemap = function (container) {
-        container.selectAll("rect.cell").remove();
-
+        container.selectAll("rect.treemapcell").remove();
         return force;
     };
 
