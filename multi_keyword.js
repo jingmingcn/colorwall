@@ -128,6 +128,8 @@ $(function(){
 	var template = "treemap";
 	var nodeValueMax,nodeValueMin;
 
+	var tooltipInstance;
+
 	var rScale = d3.scale.log().range([4, 20]);
 	var labelFontSizeScale = d3.scale.log().range([8,20]);
 	var labelOpacityScale = d3.scale.log().range([0.4,1])
@@ -148,7 +150,12 @@ $(function(){
 				    .linkStrengthInsideCluster(0.3)
 				    .linkStrengthInterCluster(0.05)
 				    .gravityToFoci(0.35)
-				    .charge(force_charge);
+					.charge(force_charge);
+					
+	var voronoi = d3.geom.voronoi()
+					.x(function(d) { return d.x; })
+					.y(function(d) { return d.y; });
+					//.clipExtent([[0, 0], [w, h]]);
 
 	var zoom = d3.behavior.zoom()
 	    .scaleExtent([0.1, 10])
@@ -396,7 +403,7 @@ $(function(){
 		    .style("fill", "none")
 		    .style("pointer-events", "all");
 
-		container = svg.append("g");
+		container = svg.append("g").attr("id","container");
 
 		svg_bottom = d3.select("body").append("svg").attr("class","svg_bottom").attr("width",window_width).attr("height",50).attr("top",window_height-50);
 
@@ -421,7 +428,7 @@ $(function(){
 
 		// Define the div for the tooltip
 		var div = d3.select("body").append("div")	
-		    .attr("class", "tooltip")				
+		    .attr("class", "mytooltip")				
 		    .style("opacity", 0);
 
 
@@ -800,7 +807,21 @@ $(function(){
 			    			return 'rotate('+degree+' '+center.x+' '+center.y+') translate('+-d3.select(this).attr('width')/2+','+-(dr+min_r+1)+')';
 			    		});
 		    	});
-		    });
+			});
+			
+			container.selectAll(".voronoi")
+				.data(voronoi(data.nodes)) //Use vononoi() with your dataset inside
+				.enter().append("path")
+				.attr("d", function(d, i) { return "M" + d.join("L") + "Z"; })
+				.datum(function(d, i) { return d.point; })
+				//Give each cell a unique class where the unique part corresponds
+				//to the circle classes
+				.attr("class", function(d,i) { return "voronoi "; })
+				//.style("stroke", "#2074A0") //If you want to look at the cells
+				.style("fill", "none")
+				.style("pointer-events", "all")
+				.on("mouseover", showTooltip)
+    			.on("mouseout",  removeTooltip);
 	}
 
 	var nodeRadiusScale = function(d){
@@ -890,6 +911,32 @@ $(function(){
 	        || y1 > ny2
 	        || y2 < ny1;
 	  };
-}
+	}
+
+	function showTooltip(d) {
+		// tooltipInstance = new Tooltip($(this),{
+		// 	container: "body",
+		// 	title: function() { return d.id; } ,
+    	// 	trigger: "hover",
+		// });
+		// tooltipInstance.show();
+
+		$(this).popover({
+			placement: 'auto', //place the tooltip above the item
+			container: 'body', //the name (class or id) of the container
+			trigger: 'manual',
+			html : true,
+			content: function() { return d.id; } //the content inside the tooltip
+		});
+		$(this).popover('show');
+	}
+	
+	//Hide the tooltip when the mouse moves away
+	function removeTooltip() {
+		//Hide the tooltip
+		$('.popover').each(function() {
+			$(this).remove();
+		});
+	}
 	
 });

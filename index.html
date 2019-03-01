@@ -3,6 +3,7 @@
 <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
 <meta http-equiv="Cache-Control" content="no-store" />
 <title>Colorwall: an embedding temporal display solution</title>
+<link rel="stylesheet" type="text/css" href="bootstrap-4.1.0-dist/css/bootstrap.min.css">
 <style type="text/css">
 	html body{
 		margin: 0;
@@ -66,7 +67,7 @@
 	  z-index: 99999 !important;
 	}
 
-	div.tooltip {	
+	div.mytooltip {	
 	    position: absolute;			
 	    text-align: left;			
 	    width: 600px;					
@@ -84,11 +85,16 @@
 		stroke: #999;
 	  stroke-width:4px;
 	}
+
+	.voronoi{
+		stroke: #AAA;
+	  stroke-width:2px;
+	}
+
 </style>
 
 <script src="js/jquery-3.1.1.min.js" charset="utf-8" ></script>
 <script src="js/d3.v3.min.js" charset="utf-8" ></script>
-
 <script type="text/javascript" src="d3.v4.js"></script>
 <script type="text/javascript" src="d3-legend.js"  charset="utf-8"></script>	
 <script type="text/javascript" src="d3-scale-chromatic.v1.1.js"></script>
@@ -98,7 +104,9 @@
 <script type="text/javascript" src="js/forceInABox.js"></script>
 <script type="text/javascript" src="js/colorbrewer.js"></script>
 <script type="text/javascript" src="js/colorbar.js"></script>
-<script type="text/javascript" src="bootstrap-4.1.0-dist/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="bootstrap-4.1.0-dist/js/bootstrap.bundle.min.js"></script>
 <script type="text/javascript" src="bootbox.min.js"></script>
 <script type="text/javascript" src="multi_keyword.js" charset="utf-8"></script>
+
+
 
