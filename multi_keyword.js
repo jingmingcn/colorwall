@@ -809,19 +809,19 @@ $(function(){
 		    	});
 			});
 			
-			container.selectAll(".voronoi")
-				.data(voronoi(data.nodes)) //Use vononoi() with your dataset inside
-				.enter().append("path")
-				.attr("d", function(d, i) { return "M" + d.join("L") + "Z"; })
-				.datum(function(d, i) { return d.point; })
-				//Give each cell a unique class where the unique part corresponds
-				//to the circle classes
-				.attr("class", function(d,i) { return "voronoi "; })
-				//.style("stroke", "#2074A0") //If you want to look at the cells
-				.style("fill", "none")
-				.style("pointer-events", "all")
-				.on("mouseover", showTooltip)
-    			.on("mouseout",  removeTooltip);
+			// container.selectAll(".voronoi")
+			// 	.data(voronoi(data.nodes)) //Use vononoi() with your dataset inside
+			// 	.enter().append("path")
+			// 	.attr("d", function(d, i) { return "M" + d.join("L") + "Z"; })
+			// 	.datum(function(d, i) { return d.point; })
+			// 	//Give each cell a unique class where the unique part corresponds
+			// 	//to the circle classes
+			// 	.attr("class", function(d,i) { return "voronoi "; })
+			// 	//.style("stroke", "#2074A0") //If you want to look at the cells
+			// 	.style("fill", "none")
+			// 	.style("pointer-events", "all")
+			// 	.on("mouseover", showTooltip)
+    		// 	.on("mouseout",  removeTooltip);
 	}
 
 	var nodeRadiusScale = function(d){
