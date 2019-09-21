@@ -130,7 +130,7 @@ $(function(){
 
 	var tooltipInstance;
 
-	var rScale = d3.scale.log().range([4, 20]);
+	var rScale = d3.scale.log().range([2, 16]);
 	var labelFontSizeScale = d3.scale.log().range([8,20]);
 	var labelOpacityScale = d3.scale.log().range([0.4,1])
 	var yScale = d3.scale.linear().range([preferences['height']-20, 20]);
@@ -144,8 +144,9 @@ $(function(){
 	var force  = d3.layout.forceInABox()
 				    .size([w, h-50])
 				    .treemapSize([w, h-50])
-				    .enableGrouping(true)
-				    .linkDistance(preferences['link_distance'])
+					.enableGrouping(true)
+					.linkStrength(d=>{return d.strength})
+				    //.linkDistance(preferences['link_distance'])
 				    .gravityOverall(0.001)
 				    .linkStrengthInsideCluster(0.3)
 				    .linkStrengthInterCluster(0.05)
@@ -345,7 +346,15 @@ $(function(){
 	            value:d.sum,
 	            seq:d.value
 	        };
-	    });
+		});
+		
+		var edge_value_min = d3.min(edges,function(d){return d.value;});
+		var edge_value_max = d3.max(edges,function(d){return d.value;});
+		var edge_value_scale = d3.scale.linear().range([0,1]).domain([0,edge_value_max]);
+		edges.forEach(d=>{
+			d.strength = edge_value_scale(d.value);
+			d.value = 10;
+		});
 
 		data =  {"nodes":nodeArray, "links":edges};
 
