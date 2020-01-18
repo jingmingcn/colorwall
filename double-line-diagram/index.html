@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+
+.link, .link2{
+  stroke: #000;
+  stroke-width: 1.5px;
+}
+
+.node {
+  cursor: move;
+  fill: #ccc;
+  stroke: #000;
+  stroke-width: 1.5px;
+}
+
+.node.fixed {
+  fill: #f00;
+}
+
+</style>
+<body>
+<script src="//d3js.org/d3.v3.min.js"></script>
+<script>
+
+var width = 960,
+    height = 500;
+
+var r = 12;
+
+var force = d3.layout.force()
+    .size([width, height])
+    .charge(-400)
+    .linkDistance(40)
+    .on("tick", tick);
+
+var drag = force.drag()
+    .on("dragstart", dragstart);
+
+var svg = d3.select("body").append("svg")
+    .attr("width", width)
+    .attr("height", height);
+
+var link = svg.selectAll(".link"),
+    link2 = svg.selectAll(".link2"),
+    node = svg.selectAll(".node");
+
+d3.json("graph.json", function(error, graph) {
+  if (error) throw error;
+
+  force
+      .nodes(graph.nodes)
+      .links(graph.links)
+      .start();
+
+  link = link.data(graph.links)
+    .enter().append("line")
+      .attr("class", "link");
+
+  link2 = link2.data(graph.links)
+    .enter().append("line")
+      .attr("class", "link2");
+
+  node = node.data(graph.nodes)
+    .enter().append("circle")
+      .attr("class", "node")
+      .attr("r", 12)
+      .on("dblclick", dblclick)
+      .call(drag);
+});
+
+function tick() {
+  link.attr("x1", function(d) { return d.source.x; })
+      .attr("y1", function(d) { return d.source.y; })
+      .attr("x2", function(d) { return d.target.x; })
+      .attr("y2", function(d) { return d.target.y; })
+      .attr("transform",function(d){
+          x1 = d.source.x;
+          y1 = d.source.y;
+          x2 = d.target.x;
+          y2 = d.target.y;
+          l = Math.sqrt((y2-y1)*(y2-y1)+(x2-x1)*(x2-x1));
+          x_ = r*(y2-y1)/l;
+          y_ = -r*(x2-x1)/l;
+          return "translate("+x_/2+","+y_/2+")";
+          //return "translate(0,"+r/2+")";
+    });
+
+  link2.attr("x1", function(d) { return d.source.x; })
+      .attr("y1", function(d) { return d.source.y; })
+      .attr("x2", function(d) { return d.target.x; })
+      .attr("y2", function(d) { return d.target.y; })
+      .attr("transform",function(d){
+          x1 = d.source.x;
+          y1 = d.source.y;
+          x2 = d.target.x;
+          y2 = d.target.y;
+          l = Math.sqrt((y2-y1)*(y2-y1)+(x2-x1)*(x2-x1));
+          x_ = r*(y1-y2)/l;
+          y_ = -r*(x1-x2)/l;
+          
+          return "translate("+x_/2+","+y_/2+")";
+          //return "translate(0,"+-r/2+")";
+    });
+
+  node.attr("cx", function(d) { return d.x; })
+      .attr("cy", function(d) { return d.y; });
+}
+
+function dblclick(d) {
+  d3.select(this).classed("fixed", d.fixed = false);
+}
+
+function dragstart(d) {
+  d3.select(this).classed("fixed", d.fixed = true);
+}
+
+</script>
