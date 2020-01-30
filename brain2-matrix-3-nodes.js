@@ -44,7 +44,7 @@ $(function(){
 	console.log(document.implementation.hasFeature("http://www.w3.org/TR/SVG2/feature#GraphicsAttribute", 2.0));
 
 	var data,mdata;
-	const url = "brain_net_2.json";
+	const url = "brain_net_2-matrix-3-nodes.json";
 	const topKeywords = ["visualization", "data", "interactive", "volume", "analysis", "exploring", "rendering", "analytical", "information", "surface"];
 	//var keyword = 'temporal,spatial';
 	//var keyword = '';
@@ -53,10 +53,10 @@ $(function(){
 	if (!year_from)		year_from 		= 	1990;
 	if (!year_to)		year_to 		= 	2016;
 	if (!threshold)		threshold 		= 	0;
-	if (!node_r_min)	node_r_min 		= 	20;
-	if (!node_r_max)	node_r_max 		= 	20;
-	if (!link_distance)	link_distance	=	100;
-	if (!force_charge)	force_charge	= 	-500;
+	if (!node_r_min)	node_r_min 		= 	4;
+	if (!node_r_max)	node_r_max 		= 	4;
+	if (!link_distance)	link_distance	=	200;
+	if (!force_charge)	force_charge	= 	-2000;
 	if (toggle_label === 'false'){
 			toggle_label = false;
 	}else{
@@ -143,11 +143,11 @@ $(function(){
 				    .size([w, h-50])
 				    .treemapSize([w, h-50])
 				    .enableGrouping(true)
-				    //.linkDistance(preferences['link_distance'])
-				    .gravityOverall(0.001)
-				    .linkStrengthInsideCluster(0.3)
-				    .linkStrengthInterCluster(0.05)
-				    .gravityToFoci(0.35)
+				    .linkDistance(preferences['link_distance'])
+				    //.gravityOverall(0.001)
+				    //.linkStrengthInsideCluster(0.3)
+				    //.linkStrengthInterCluster(0.05)
+				    //.gravityToFoci(0.35)
 					.charge(force_charge);
 					
 	var voronoi = d3.geom.voronoi()
@@ -201,6 +201,7 @@ $(function(){
 	    preferences['seq_size'] = 16;
 
 		netClustering.cluster(data.nodes, data.links);
+		data.nodes.forEach((v,i)=>{v.index = i;});
 		console.log(data.nodes[0]);
 		data.links = data.links.filter(d=>{
 			return data.nodes[d.source].cluster == data.nodes[d.target].cluster;
@@ -299,8 +300,10 @@ $(function(){
 					.attr('x',function(d,i){return 0;})
 					.attr('y',function(d,i){return 0;})
 					//.attr("width", x.rangeBand())
-					.attr("height", 10)
-					.attr('fill',function(d,i){return color(d);})
+					//.attr("height", 10)
+					//.attr('fill',function(d,i){return color(d);})
+					.attr('fill',function(d,i){return d3.interpolateGreens(Math.sqrt(Math.abs(d)));})
+					
 					.style('opacity',function(d,i){
 						if(d==0){
 							return 0.5;
@@ -315,8 +318,9 @@ $(function(){
 					.attr('x',function(d,i){return 0;})
 					.attr('y',function(d,i){return 0;})
 					//.attr("width", x.rangeBand())
-					.attr("height", 10)
-					.attr('fill',function(d,i){return color(d);})
+					//.attr("height", 10)
+					//.attr('fill',function(d,i){return color(d);})
+					.attr('fill',function(d,i){return d3.interpolateGreens(Math.sqrt(Math.abs(d)));})
 					.style('opacity',function(d,i){
 						if(d==0){
 							return 0.5;
@@ -342,6 +346,8 @@ $(function(){
 					return labelOpacityScale(d.value);
 				});
 		nodes = container.selectAll(".node").data(data.nodes).enter().append("circle","svg").attr("class","node")
+			.attr('data-name',function(d){return d.name;})
+			.attr('data-index',function(d){return d.index;})
 			//.attr("r",preferences['node_radius'])
 			.attr("r",10)
 			// .attr("r",function(d){
@@ -579,8 +585,8 @@ $(function(){
 		      	var radians = Math.atan2(-(source.y-center.y),(source.x-center.x));
 		      	var degrees = radians * 180/Math.PI;
 
-		      	var degree_margin_source = Math.atan2(source_r,dr)*180/Math.PI;
-		      	var degree_margin_target = Math.atan2(target_r,dr)*180/Math.PI;
+		      	var degree_margin_source = Math.atan2(source_r,dr)*180/Math.PI/2;
+		      	var degree_margin_target = Math.atan2(target_r,dr)*180/Math.PI/2;
 				var degree_between = 60 - degree_margin_source - degree_margin_target;
 				  
 		    	d3.select(this).selectAll('.rect0').each(function(s,i){
@@ -589,11 +595,12 @@ $(function(){
 					
 		    		d3.select(this).attr('x',center.x).attr('y',center.y)
 		    			.attr('width',area_width)
+		    			.attr('height',area_width)
 		    			.attr('transform',function(){
 							//degree = -degrees+90+degree_margin+(60-degree_margin*2)*i;
 							
 			    			degree = -degrees+90+degree_margin_source+(degree_between/block_count)*(i+Math.floor(i/500))+degree_between/2/block_count;
-			    			return 'rotate('+degree+' '+center.x+' '+center.y+') translate('+-d3.select(this).attr('width')/2+','+-(dr-1)+')';
+			    			return 'rotate('+degree+' '+center.x+' '+center.y+') translate('+-d3.select(this).attr('width')/2+','+-(dr+area_width*3/2)+')';
 			    		});
 				});
 				
@@ -602,12 +609,13 @@ $(function(){
 					area_width = (dr-source_r-target_r)/block_count;
 					
 		    		d3.select(this).attr('x',center.x).attr('y',center.y)
-		    			.attr('width',area_width)
+		    			.attr('width',area_width/2)
+		    			.attr('height',area_width/2)
 		    			.attr('transform',function(){
 							//degree = -degrees+90+degree_margin+(60-degree_margin*2)*i;
 							
 			    			degree = -degrees+90+degree_margin_source+(degree_between/block_count)*(i+Math.floor(i/500))+degree_between/2/block_count;
-			    			return 'rotate('+degree+' '+center.x+' '+center.y+') translate('+-d3.select(this).attr('width')/2+','+-(dr+12)+')';
+			    			return 'rotate('+degree+' '+center.x+' '+center.y+') translate('+-d3.select(this).attr('width')/2+','+-(dr+area_width*5/4)+')';
 			    		});
 		    	});
 			});

@@ -3,8 +3,8 @@
 <style>
 
 .link, .link2{
-  stroke: #000;
-  stroke-width: 1.5px;
+  
+  stroke-width: 4px;
 }
 
 .node {
@@ -21,6 +21,9 @@
 </style>
 <body>
 <script src="//d3js.org/d3.v3.min.js"></script>
+<script src="https://d3js.org/d3-color.v1.min.js"></script>
+<script src="https://d3js.org/d3-interpolate.v1.min.js"></script>
+<script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
 <script>
 
 var width = 960,
@@ -45,23 +48,27 @@ var link = svg.selectAll(".link"),
     link2 = svg.selectAll(".link2"),
     node = svg.selectAll(".node");
 
-d3.json("graph.json", function(error, graph) {
+var nodes;
+
+d3.json("dataset.json", function(error, dataset) {
   if (error) throw error;
 
+  nodes = dataset.d1.nodes;
+
   force
-      .nodes(graph.nodes)
-      .links(graph.links)
+      .nodes(dataset.d1.nodes)
+      .links(dataset.d1.links)
       .start();
 
-  link = link.data(graph.links)
+  link = link.data(dataset.d1.links)
     .enter().append("line")
       .attr("class", "link");
 
-  link2 = link2.data(graph.links)
+  link2 = link2.data(dataset.d2.links)
     .enter().append("line")
       .attr("class", "link2");
 
-  node = node.data(graph.nodes)
+  node = node.data(dataset.d1.nodes)
     .enter().append("circle")
       .attr("class", "node")
       .attr("r", 12)
@@ -74,6 +81,7 @@ function tick() {
       .attr("y1", function(d) { return d.source.y; })
       .attr("x2", function(d) { return d.target.x; })
       .attr("y2", function(d) { return d.target.y; })
+      .attr("stroke",function(d){return d3.interpolateGreens(d.weight);})
       .attr("transform",function(d){
           x1 = d.source.x;
           y1 = d.source.y;
@@ -86,15 +94,16 @@ function tick() {
           //return "translate(0,"+r/2+")";
     });
 
-  link2.attr("x1", function(d) { return d.source.x; })
-      .attr("y1", function(d) { return d.source.y; })
-      .attr("x2", function(d) { return d.target.x; })
-      .attr("y2", function(d) { return d.target.y; })
+  link2.attr("x1", function(d) { return nodes[d.source].x; })
+      .attr("y1", function(d) { return nodes[d.source].y; })
+      .attr("x2", function(d) { return nodes[d.target].x; })
+      .attr("y2", function(d) { return nodes[d.target].y; })
+      .attr("stroke",function(d){return d3.interpolateReds(d.weight);})
       .attr("transform",function(d){
-          x1 = d.source.x;
-          y1 = d.source.y;
-          x2 = d.target.x;
-          y2 = d.target.y;
+          x1 = nodes[d.source].x;
+          y1 = nodes[d.source].y;
+          x2 = nodes[d.target].x;
+          y2 = nodes[d.target].y;
           l = Math.sqrt((y2-y1)*(y2-y1)+(x2-x1)*(x2-x1));
           x_ = r*(y1-y2)/l;
           y_ = -r*(x1-x2)/l;
