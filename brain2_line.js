@@ -55,8 +55,8 @@ $(function(){
 	if (!threshold)		threshold 		= 	0;
 	if (!node_r_min)	node_r_min 		= 	4;
 	if (!node_r_max)	node_r_max 		= 	4;
-	if (!link_distance)	link_distance	=	100;
-	if (!force_charge)	force_charge	= 	-2000;
+	if (!link_distance)	link_distance	=	200;
+	if (!force_charge)	force_charge	= 	-1;
 	if (toggle_label === 'false'){
 			toggle_label = false;
 	}else{
@@ -140,14 +140,14 @@ $(function(){
 		h = +preferences['height'];
 
 	var force  = d3.layout.forceInABox()
-				    .size([w, h-50])
-				    .treemapSize([w, h-50])
+				    .size([w/2, (h-50)/2])
+				    .treemapSize([w/2, (h-50)/2])
 				    .enableGrouping(true)
-				    .linkDistance(preferences['link_distance'])
-				    .gravityOverall(0.001)
-				    .linkStrengthInsideCluster(0.3)
-				    .linkStrengthInterCluster(0.05)
-				    .gravityToFoci(0.05)
+				    //.linkDistance(preferences['link_distance'])
+				    //.gravityOverall(0.001)
+				    //.linkStrengthInsideCluster(0.3)
+				    //.linkStrengthInterCluster(0.05)
+				    //.gravityToFoci(0.05)
 					.charge(force_charge);
 					
 	var voronoi = d3.geom.voronoi()
@@ -332,22 +332,22 @@ $(function(){
 		
 
 		links = container.selectAll(".link").data(data.links).enter().insert("path").attr("class","link");
-		labels = container.selectAll('.label_')
-			.data(data.nodes).enter().append('text').attr('class','label_')
-			.text(function(d,i){return d.name;}).style('z-index',1)
-			.attr('font-size',function(d){
-					return labelFontSizeScale(d.value)+'px';
-				})
-			.attr('opacity',function(d){
-					return labelOpacityScale(d.value);
-				});
+		// labels = container.selectAll('.label_')
+		// 	.data(data.nodes).enter().append('text').attr('class','label_')
+		// 	.text(function(d,i){return d.name;}).style('z-index',1)
+		// 	.attr('font-size',function(d){
+		// 			return labelFontSizeScale(d.value)+'px';
+		// 		})
+		// 	.attr('opacity',function(d){
+		// 			return labelOpacityScale(d.value);
+		// 		});
 		nodes = container.selectAll(".node").data(data.nodes).enter().append("circle","svg").attr("class","node")
 			//.attr("r",preferences['node_radius'])
-			.attr("r",10)
+			.attr("r",4)
 			// .attr("r",function(d){
 			// 	return rScale(d.value);
 			// })
-			.style('stroke-width',2)
+			.style('stroke-width',0)
 			.style('fill',function(d){
 				//return sequentialScaleNode(d.value);
 			});
@@ -535,10 +535,10 @@ $(function(){
 	};
 
 	end = function(e){
-			labels.attr('dx',function(d){return d.x-nodeRadiusScale(d);})
-				.attr('dy',function(d){
-					return d.y+this.getBBox().height+nodeRadiusScale(d);
-				});
+			// labels.attr('dx',function(d){return d.x-nodeRadiusScale(d);})
+			// 	.attr('dy',function(d){
+			// 		return d.y+this.getBBox().height+nodeRadiusScale(d);
+			// 	});
 				
 			links.each(function(d){
 				d.center = circleCenter(d.source.x,d.source.y,d.target.x,d.target.y,60);
@@ -569,12 +569,12 @@ $(function(){
 
 		      	//var min_r = d3.min([nodeRadiusScale(d.source),nodeRadiusScale(d.target)]);
 				  //var max_r = d3.max([nodeRadiusScale(d.source),nodeRadiusScale(d.target)]);
-				var min_r = 20;
+				var min_r = 4;
 
 		      	// var source_r = nodeRadiusScale(d.source);
 				  // var target_r = nodeRadiusScale(d.target);
-				  var source_r = 20;
-				  var target_r = 20;
+				  var source_r = 4;
+				  var target_r = 4;
 
 		      	var radians = Math.atan2(-(source.y-center.y),(source.x-center.x));
 		      	var degrees = radians * 180/Math.PI;
