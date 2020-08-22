@@ -22,8 +22,6 @@ function updateQueryStringParameter(uri, key, value) {
   }
 }
 
-Math.seedrandom("myseed");
-
 $(function () {
   var keyword = getParameterByName("keyword");
   var year_from = getParameterByName("year_from");
@@ -47,7 +45,7 @@ $(function () {
   );
 
   var data, mdata;
-  const url = "IEEE VIS papers 1990-2016 - Main dataset.csv";
+  const url = "brain_net_2.json";
   const topKeywords = [
     "visualization",
     "data",
@@ -60,17 +58,17 @@ $(function () {
     "information",
     "surface",
   ];
-  var keyword = "temporal,spatial";
+  //var keyword = 'temporal,spatial';
   //var keyword = '';
 
   if (!keyword) keyword = "";
   if (!year_from) year_from = 1990;
   if (!year_to) year_to = 2016;
-  if (!threshold) threshold = 4;
+  if (!threshold) threshold = 0;
   if (!node_r_min) node_r_min = 4;
-  if (!node_r_max) node_r_max = 12;
-  if (!link_distance) link_distance = 150;
-  if (!force_charge) force_charge = -1000;
+  if (!node_r_max) node_r_max = 4;
+  if (!link_distance) link_distance = 200;
+  if (!force_charge) force_charge = -50;
   if (toggle_label === "false") {
     toggle_label = false;
   } else {
@@ -103,7 +101,7 @@ $(function () {
     year_to: Number.MIN_VALUE,
     seq_min: Number.MAX_VALUE,
     seq_max: Number.MIN_VALUE,
-    seq_size: 0,
+    seq_size: 16,
     seq_threshold: parseInt(threshold),
     link_filter: parseInt(link_filter),
     width: $(window).width() - margin.left - margin.right,
@@ -125,7 +123,7 @@ $(function () {
   var labels;
   var links;
   var circleCenters;
-  var path, path2;
+  var path;
   var paths;
   var area_x_scale;
   var area, area2;
@@ -142,9 +140,9 @@ $(function () {
 
   var tooltipInstance;
 
-  var rScale = d3.scale.log().range([4, 16]);
-  var labelFontSizeScale = d3.scale.log().range([12, 20]);
-  var labelOpacityScale = d3.scale.log().range([0.4, 1]);
+  var rScale = d3.scale.log().range([4, 20]);
+  var labelFontSizeScale = d3.scale.log().range([8, 12]);
+  var labelOpacityScale = d3.scale.log().range([0.4, 0.9]);
   var yScale = d3.scale.linear().range([preferences["height"] - 20, 20]);
   var xScale = d3.scale
     .linear()
@@ -158,17 +156,17 @@ $(function () {
 
   var force = d3.layout
     .forceInABox()
-    .size([w, h - 50])
-    .treemapSize([w, h - 50])
+    .size([w - 200, h - 50])
+
+    .treemapSize([w - 400, h - 50 - 200])
+
     //.enableGrouping(true)
-    .linkStrength((d) => {
-      return d.strength;
-    })
+    //.linkStrength(d=>{return d.strength})
     //.linkDistance(preferences['link_distance'])
-    .gravityOverall(0.001)
-    .linkStrengthInsideCluster(0.3)
-    .linkStrengthInterCluster(0.05)
-    .gravityToFoci(0.35)
+    // .gravityOverall(0.001)
+    // .linkStrengthInsideCluster(0.3)
+    // .linkStrengthInterCluster(0.05)
+    .gravityToFoci(0.3)
     .charge(force_charge);
 
   var voronoi = d3.geom
@@ -226,212 +224,31 @@ $(function () {
     }
   }
 
-  d3.csv(url, function (error, rawdata) {
+  d3.json(url, function (error, mdata) {
     if (error) throw error;
+    data = mdata;
+    preferences["seq_size"] = 16;
 
-    mdata = rawdata;
-
-    var nodeArray = [],
-      edges = [];
-    var nodesMap = d3.map();
-    var edgesCount = d3.map();
-
-    function getNodeOrCreate(t) {
-      var node;
-      if (!nodesMap.has(t)) {
-        nodesMap.set(t, { id: t, name: t, value: 0 });
-      }
-      return nodesMap.get(t);
-    }
-
-    function addCount(t) {
-      var node = getNodeOrCreate(t);
-      node.value += 1;
-      nodesMap.set(t, node);
-      return node;
-    }
-
-    console.log("Data Entries Size: " + mdata.length);
-
-    mdata = mdata.filter(function (d) {
-      var year = parseInt(d["Year"]);
-      return (
-        preferences["filter_year_from"] <= year &&
-        year <= preferences["filter_year_to"]
-      );
+    netClustering.cluster(data.nodes, data.links);
+    console.log(data.nodes[0]);
+    data.links = data.links.filter((d) => {
+      return data.nodes[d.source].cluster == data.nodes[d.target].cluster;
     });
 
-    console.log("Data Entries Size: " + mdata.length);
-
-    mdata.forEach(function (d) {
-      var year = parseInt(d["Year"]);
-      if (year) {
-        if (preferences["year_from"] > year) {
-          preferences["year_from"] = year;
-        }
-        if (preferences["year_to"] < year) {
-          preferences["year_to"] = year;
-        }
-      }
-    });
-
-    console.log(preferences["year_from"] + " " + preferences["year_to"]);
-
-    preferences["seq_size"] =
-      preferences["year_to"] - preferences["year_from"] + 1;
-
-    mdata.forEach(function (d) {
-      var abstract = d["Abstract"];
-      var paper_title = d["Paper Title"];
-      var text = abstract + " " + paper_title;
-      if (!abstract && !paper_title) {
-        return;
-      }
-
-      if (keyword && keyword.split(",").length > 0) {
-        found = false;
-        keyword.split(",").forEach(function (t) {
-          if (text.search(new RegExp(t.trim(), "i")) > 0) {
-            found = true;
-          }
-        });
-        if (!found) {
-          return;
-        }
-      }
-
-      var author = d["Author Names"].split(";");
-      var year = new Number(d["Year"]);
-
-      author.forEach(function (d) {
-        addCount(d);
-      });
-
-      author.forEach(function (t1) {
-        author.forEach(function (t2) {
-          t1 = t1.trim();
-          t2 = t2.trim();
-
-          if (t1 === t2) {
-            return;
-          }
-
-          var key = t1 < t2 ? t1 + "|" + t2 : t2 + "|" + t1;
-
-          if (edgesCount.has(key)) {
-            var seq_array = edgesCount.get(key);
-            seq_array[year - preferences["year_from"]] += 1;
-          } else {
-            edgesCount.set(key, new Array(preferences["seq_size"]).fill(0));
-          }
-        });
-      });
-    });
-
-    edgesCount.entries().map(function (d) {
-      d.value.forEach(function (i) {
-        if (preferences["seq_min"] > i) {
-          preferences["seq_min"] = i;
-        }
-        if (preferences["seq_max"] < i) {
-          preferences["seq_max"] = i;
-        }
-      });
-    });
-
-    edges = edgesCount
-      .entries()
-      .filter(function (element, index, array) {
-        var sum = 0,
-          rt = true;
-        element.value.forEach(function (d) {
-          sum += d;
-        });
-        element.sum = sum;
-        if (sum < preferences["seq_threshold"]) {
-          rt = false;
-        }
-
-        if (
-          author_name &&
-          !element.key.toUpperCase().includes(author_name.toUpperCase())
-        ) {
-          rt = false;
-        }
-
-        return rt;
-      })
-      .map(function (d) {
-        var t1, t2;
-        t1 = d.key.split("|")[0];
-        t2 = d.key.split("|")[1];
-        var node1 = getNodeOrCreate(t1);
-        var node2 = getNodeOrCreate(t2);
-        if (nodeArray.indexOf(node1) === -1) {
-          nodeArray.push(node1);
-        }
-        if (nodeArray.indexOf(node2) === -1) {
-          nodeArray.push(node2);
-        }
-
-        return {
-          source: node1.value < node2.value ? node1 : node2,
-          target: node1.value < node2.value ? node2 : node1,
-          value: d.sum,
-          seq: d.value,
-        };
-      });
-
-    var edge_value_min = d3.min(edges, function (d) {
-      return d.value;
-    });
-    var edge_value_max = d3.max(edges, function (d) {
-      return d.value;
-    });
     var edge_value_scale = d3.scale
       .linear()
       .range([0, 1])
-      .domain([0, edge_value_max]);
-    edges.forEach((d) => {
-      d.strength = edge_value_scale(d.value);
-      d.value = 10;
+      .domain([
+        0,
+        d3.max(data.links, function (d) {
+          return d.value;
+        }),
+      ]);
+    data.links.forEach((d) => {
+      //d.strength = edge_value_scale(d.value);
+      //d.value = 10;
     });
 
-    data = { nodes: nodeArray, links: edges };
-
-    //netClustering.cluster(data.nodes, data.links);
-
-    console.log(data.links.length);
-
-    data.links = data.links.filter(function (element, index, array) {
-      return element.source.cluster == element.target.cluster;
-    });
-
-    console.log(data.links.length);
-
-    $.each(data.nodes, function (index_node, item_node) {
-      item_node.size = 0;
-      $.each(data.links, function (index_link, item_link) {
-        if (item_link.source === index_node) {
-          $.each(item_link.seq, function (index, item) {
-            item_node.size += item / 1;
-          });
-        }
-      });
-    });
-
-    nodeValueMax = d3.max(data.nodes, function (d) {
-      return d.value;
-    });
-    nodeValueMin = d3.min(data.nodes, function (d) {
-      return d.value;
-    });
-    rScale.domain([
-      0,
-      d3.max(data.nodes, function (d) {
-        return d.value;
-      }),
-    ]);
     yScale.domain([
       0,
       d3.max(data.nodes, function (d) {
@@ -509,8 +326,8 @@ $(function () {
     );
     var color = d3.scale
       .ordinal()
-      .range(colorbrewer.Reds[9])
-      .domain([0, preferences["seq_max"]]);
+      .range(["#238b45", "#444", "#E44"])
+      .domain([-1, 0, 1]);
 
     var sequentialScale = d3v4
       .scaleSequential(d3v4.interpolateReds)
@@ -583,26 +400,47 @@ $(function () {
       .each(function (d, i) {
         ld = d;
         d3.select(this)
-          .selectAll(".rect")
-          .data(d.seq)
+          .selectAll(".rect0")
+          .data(d.seq[0])
           .enter()
           .insert("rect")
-          .attr("class", "rect")
+          .attr("class", "rect0")
           .attr("x", function (d, i) {
             return 0;
           })
           .attr("y", function (d, i) {
             return 0;
           })
-          .attr("width", x.rangeBand())
-          .attr("height", function (d) {
-            return d3.min([
-              nodeRadiusScale(ld.source),
-              nodeRadiusScale(ld.target),
-            ]);
-          })
+          //.attr("width", x.rangeBand())
+          //.attr("height", 10)
           .attr("fill", function (d, i) {
-            return color(d / preferences["seq_max"]);
+            return color(d);
+          })
+          .style("opacity", function (d, i) {
+            if (d == 0) {
+              return 0.5;
+            } else {
+              return 1;
+            }
+          });
+        //.attr('fill',function(d,i){return sequentialScale(preferences['seq_max']-d);})
+        //.attr('stroke',function(d,i){return color(d/preferences['seq_max']);});
+        d3.select(this)
+          .selectAll(".rect1")
+          .data(d.seq[1])
+          .enter()
+          .insert("rect")
+          .attr("class", "rect1")
+          .attr("x", function (d, i) {
+            return 0;
+          })
+          .attr("y", function (d, i) {
+            return 0;
+          })
+          //.attr("width", x.rangeBand())
+          //.attr("height", 10)
+          .attr("fill", function (d, i) {
+            return color(d);
           })
           .style("opacity", function (d, i) {
             if (d == 0) {
@@ -644,54 +482,13 @@ $(function () {
       .append("circle", "svg")
       .attr("class", "node")
       //.attr("r",preferences['node_radius'])
-      .attr("r", function (d) {
-        return nodeRadiusScale(d);
-      })
+      .attr("r", 4)
       // .attr("r",function(d){
       // 	return rScale(d.value);
       // })
-      .style("stroke-width", edge / 1)
+      .style("stroke-width", 0)
       .style("fill", function (d) {
-        return sequentialScaleNode(d.value);
-      })
-      .on("mouseover", function (d, i) {
-        d3.select(this).style("stroke", "blue");
-
-        var titles = mdata
-          .filter((v) => {
-            return v["Author Names"].indexOf(d.id) >= 0;
-          })
-          .map((v) => {
-            return { title: v["Paper Title"], year: v["Year"] };
-          });
-
-        var t = "";
-        titles.sort((a, b) => {
-          var i = a["year"];
-          var j = b["year"];
-          return j - i;
-        });
-
-        titles = titles.slice(0, 4);
-        titles.forEach((v) => {
-          t +=
-            '<div style="white-space: nowrap;"><span class="year">' +
-            v.year +
-            "</span>" +
-            ":" +
-            v.title +
-            "</br></div>";
-        });
-
-        div.transition().duration(200).style("opacity", 0.9);
-        div
-          .html(t)
-          .style("left", d3.event.pageX + "px")
-          .style("top", d3.event.pageY - 28 + "px");
-      })
-      .on("mouseout", function (d, i) {
-        d3.select(this).style("stroke", "white");
-        div.transition().duration(500).style("opacity", 0);
+        //return sequentialScaleNode(d.value);
       });
 
     circleCenters = container
@@ -703,14 +500,10 @@ $(function () {
       .attr("r", 0)
       .style("stroke-width", "0px");
 
-    console.log(data.nodes.length);
-    console.log(labels.size());
-
     force.stop();
     force
       .nodes(data.nodes)
       .links(data.links)
-      .enableGrouping(true)
       .on("tick", ticked)
       .on("end", end)
       .start();
@@ -721,37 +514,6 @@ $(function () {
     //force.drawTreemap(svg);
 
     var gui = new dat.GUI();
-    var content_folder = gui.addFolder("Content");
-    content_folder
-      .add(preferences, "keyword")
-      .name("Keyword")
-      .listen()
-      .onFinishChange(function (value) {
-        if (value != keyword) {
-          uri = window.location.href;
-          window.location.href = updateQueryStringParameter(
-            uri,
-            "keyword",
-            value
-          );
-        }
-      });
-    content_folder
-      .add(preferences, "author_name")
-      .name("Author Name")
-      .onFinishChange(function (value) {
-        if (value != author_name) {
-          uri = window.location.href;
-          window.location.href = updateQueryStringParameter(
-            uri,
-            "author_name",
-            value
-          );
-        }
-      });
-    content_folder
-      .add(preferences, "topKeyword", topKeywords)
-      .name("Top " + topKeywords.length + " Keywords");
     var layout_folder = gui.addFolder("Layout Preferences");
     layout_folder
       .add(preferences, "toggle_label")
@@ -930,9 +692,8 @@ $(function () {
         }
       });
 
-    // content_folder.open();
-    // layout_folder.open();
-    // dataset_folder.open();
+    layout_folder.open();
+    dataset_folder.open();
 
     /**
 		var bar =  d3.selectAll("svg").append("g").attr("id","colorbar");
@@ -1009,10 +770,10 @@ $(function () {
   end = function (e) {
     labels
       .attr("dx", function (d) {
-        return d.x - nodeRadiusScale(d);
+        return d.x;
       })
       .attr("dy", function (d) {
-        return d.y + this.getBBox().height + nodeRadiusScale(d);
+        return d.y + this.getBBox().height;
       });
 
     links.each(function (d) {
@@ -1066,33 +827,35 @@ $(function () {
       var target = d.target;
       var center = d.center;
 
-      var min_r = d3.min([
-        nodeRadiusScale(d.source),
-        nodeRadiusScale(d.target),
-      ]);
+      //var min_r = d3.min([nodeRadiusScale(d.source),nodeRadiusScale(d.target)]);
       //var max_r = d3.max([nodeRadiusScale(d.source),nodeRadiusScale(d.target)]);
+      var min_r = 4;
 
-      var source_r = nodeRadiusScale(d.source);
-      var target_r = nodeRadiusScale(d.target);
+      // var source_r = nodeRadiusScale(d.source);
+      // var target_r = nodeRadiusScale(d.target);
+      var source_r = 4;
+      var target_r = 4;
 
       var radians = Math.atan2(-(source.y - center.y), source.x - center.x);
       var degrees = (radians * 180) / Math.PI;
 
-      var degree_margin_source = (Math.atan2(source_r, dr) * 180) / Math.PI;
-      var degree_margin_target = (Math.atan2(target_r, dr) * 180) / Math.PI;
+      var degree_margin_source = (Math.atan2(source_r, dr) * 180) / Math.PI / 2;
+      var degree_margin_target = (Math.atan2(target_r, dr) * 180) / Math.PI / 2;
       var degree_between = 60 - degree_margin_source - degree_margin_target;
 
       d3.select(this)
-        .selectAll(".rect")
+        .selectAll(".rect0")
         .each(function (s, i) {
           block_count =
             preferences["seq_size"] +
-            Math.floor((preferences["seq_size"] - 1) / 5);
+            Math.floor((preferences["seq_size"] - 1) / 500);
           area_width = (dr - source_r - target_r) / block_count;
+
           d3.select(this)
             .attr("x", center.x)
             .attr("y", center.y)
             .attr("width", area_width)
+            .attr("height", area_width)
             .attr("transform", function () {
               //degree = -degrees+90+degree_margin+(60-degree_margin*2)*i;
 
@@ -1100,7 +863,7 @@ $(function () {
                 -degrees +
                 90 +
                 degree_margin_source +
-                (degree_between / block_count) * (i + Math.floor(i / 5)) +
+                (degree_between / block_count) * (i + Math.floor(i / 500)) +
                 degree_between / 2 / block_count;
               return (
                 "rotate(" +
@@ -1112,7 +875,45 @@ $(function () {
                 ") translate(" +
                 -d3.select(this).attr("width") / 2 +
                 "," +
-                -(dr + min_r + 1) +
+                -(dr + (area_width * 3) / 2) +
+                ")"
+              );
+            });
+        });
+
+      d3.select(this)
+        .selectAll(".rect1")
+        .each(function (s, i) {
+          block_count =
+            preferences["seq_size"] +
+            Math.floor((preferences["seq_size"] - 1) / 500);
+          area_width = (dr - source_r - target_r) / block_count;
+
+          d3.select(this)
+            .attr("x", center.x)
+            .attr("y", center.y)
+            .attr("width", area_width / 2)
+            .attr("height", area_width / 2)
+            .attr("transform", function () {
+              //degree = -degrees+90+degree_margin+(60-degree_margin*2)*i;
+
+              degree =
+                -degrees +
+                90 +
+                degree_margin_source +
+                (degree_between / block_count) * (i + Math.floor(i / 500)) +
+                degree_between / 2 / block_count;
+              return (
+                "rotate(" +
+                degree +
+                " " +
+                center.x +
+                " " +
+                center.y +
+                ") translate(" +
+                -d3.select(this).attr("width") / 2 +
+                "," +
+                -(dr + (area_width * 5) / 4) +
                 ")"
               );
             });

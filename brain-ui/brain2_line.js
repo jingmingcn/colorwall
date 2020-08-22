@@ -87,8 +87,6 @@ $(function(){
 	if(!window_step)		window_step			= 10;
 	if(!filter_threshold)	filter_threshold	= 10;
 
-	console.log(toggle_label);
-
 	var margin = {top: -5, right: -5, bottom: -5, left: -5};
 	var window_width = $(window).width(),
 		window_height = $(window).height();
