@@ -1328,6 +1328,7 @@ $(function () {
     }
 
     $("#currentYear").text(animation_frame + year_from);
+    $("#currentYear2").text(animation_frame + year_from);
     links.attr("stroke-width", function (d) {
       return linkWidthScale(d.seq[animation_frame]);
     });
@@ -1339,6 +1340,7 @@ $(function () {
     }
 
     $("#currentYear").text(animation_frame + year_from);
+    $("#currentYear2").text(animation_frame + year_from);
     links.attr("stroke-width", function (d) {
       return linkWidthScale(d.seq[animation_frame]);
     });
@@ -1352,6 +1354,7 @@ $(function () {
         clearInterval(interval);
       }
       $("#currentYear").text(animation_frame + year_from);
+      $("#currentYear2").text(animation_frame + year_from);
       links.attr("stroke-width", function (d) {
         return linkWidthScale(d.seq[animation_frame]);
       });
@@ -1369,6 +1372,7 @@ $(function () {
   $("#undoBtn").on("click", function () {
     animation_frame = 0;
     $("#currentYear").text(animation_frame + year_from);
+    $("#currentYear2").text(animation_frame + year_from);
     links.attr("stroke-width", function (d) {
       return linkWidthScale(d.seq[animation_frame]);
     });
