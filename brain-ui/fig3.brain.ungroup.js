@@ -79,7 +79,7 @@ $(function () {
   if (!node_r_min) node_r_min = 4;
   if (!node_r_max) node_r_max = 4;
   if (!link_distance) link_distance = 100;
-  if (!force_charge) force_charge = -250;
+  if (!force_charge) force_charge = -200;
   if (toggle_label === "false") {
     toggle_label = false;
   } else {
