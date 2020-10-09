@@ -703,8 +703,7 @@ $(function () {
       .attr("r", 0)
       .style("stroke-width", "0px");
 
-    console.log(data.nodes.length);
-    console.log(labels.size());
+    console.log(data);
 
     force.stop();
     force
