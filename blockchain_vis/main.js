@@ -47,7 +47,7 @@ $(function () {
   );
 
   var data, mdata;
-  const url = "2015-2021.csv";
+  const url = "blockchain_vis_data_8022.csv";
   const topKeywords = [
     "visualization",
     "data",
@@ -60,13 +60,11 @@ $(function () {
     "information",
     "surface",
   ];
-  
-  var keyword = '';
 
   if (!keyword) keyword = "";
   if (!year_from) year_from = 2013;
   if (!year_to) year_to = 2021;
-  if (!threshold) threshold = 8;
+  if (!threshold) threshold = 12;
   if (!node_r_min) node_r_min = 4;
   if (!node_r_max) node_r_max = 12;
   if (!link_distance) link_distance = 100;
@@ -230,6 +228,12 @@ $(function () {
     if (error) throw error;
 
     mdata = rawdata;
+
+    mdata = mdata.filter(function (d) {
+      return d['Year'].trim() !== '';
+    });
+
+    console.log(mdata.length)
 
     var nodeArray = [],
       edges = [];
@@ -770,9 +774,9 @@ $(function () {
           );
         }
       });
-    content_folder
-      .add(preferences, "topKeyword", topKeywords)
-      .name("Top " + topKeywords.length + " Keywords");
+    // content_folder
+    //   .add(preferences, "topKeyword", topKeywords)
+    //   .name("Top " + topKeywords.length + " Keywords");
     var layout_folder = gui.addFolder("Layout Preferences");
     layout_folder
       .add(preferences, "toggle_label")
@@ -935,21 +939,21 @@ $(function () {
           );
         }
       });
-    dataset_folder
-      .add(preferences, "color_sensitivity", 10, 30)
-      .step(1)
-      .name("Color Sensitivity")
-      .listen()
-      .onFinishChange(function (value) {
-        if (value != color_sensitivity) {
-          uri = window.location.href;
-          window.location.href = updateQueryStringParameter(
-            uri,
-            "color_sensitivity",
-            value
-          );
-        }
-      });
+    // dataset_folder
+    //   .add(preferences, "color_sensitivity", 10, 30)
+    //   .step(1)
+    //   .name("Color Sensitivity")
+    //   .listen()
+    //   .onFinishChange(function (value) {
+    //     if (value != color_sensitivity) {
+    //       uri = window.location.href;
+    //       window.location.href = updateQueryStringParameter(
+    //         uri,
+    //         "color_sensitivity",
+    //         value
+    //       );
+    //     }
+    //   });
 
     // content_folder.open();
     // layout_folder.open();
