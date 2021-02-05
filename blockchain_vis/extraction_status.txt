@@ -1,0 +1,38 @@
+Started! (Fri Feb  5 16:25:17 2021) 
+
+Saving Slice 0: Starting 2012-01-01 08:00:00 ending 2013-01-01 08:00:00 - (Fri Feb  5 16:25:17 2021)
+Edge Added: 12	Edge removed: 0
+Writing Communities (Fri Feb  5 16:25:17 2021)
+Writing actual graph status (Fri Feb  5 16:25:17 2021)
+Writing merging file (Fri Feb  5 16:25:17 2021)
+Merged communities: 0 (Fri Feb  5 16:25:17 2021)
+Total Communities 0 (Fri Feb  5 16:25:17 2021)
+
+Started Slice 1 (16:25:17.182297)
+Saving Slice 1: Starting 2013-01-01 08:00:00 ending 2014-01-01 08:00:00 - (Fri Feb  5 16:25:17 2021)
+Edge Added: 3	Edge removed: 11
+Writing Communities (Fri Feb  5 16:25:17 2021)
+Writing actual graph status (Fri Feb  5 16:25:17 2021)
+Writing merging file (Fri Feb  5 16:25:17 2021)
+Merged communities: 0 (Fri Feb  5 16:25:17 2021)
+Total Communities 0 (Fri Feb  5 16:25:17 2021)
+
+Started Slice 2 (16:25:17.309226)
+Saving Slice 2: Starting 2014-01-01 08:00:00 ending 2015-01-01 08:00:00 - (Fri Feb  5 16:25:17 2021)
+Edge Added: 36	Edge removed: 13
+Writing Communities (Fri Feb  5 16:25:17 2021)
+Writing actual graph status (Fri Feb  5 16:25:17 2021)
+Writing merging file (Fri Feb  5 16:25:17 2021)
+Merged communities: 0 (Fri Feb  5 16:25:17 2021)
+Total Communities 0 (Fri Feb  5 16:25:17 2021)
+
+Started Slice 3 (16:25:17.435079)
+Saving Slice 3: Starting 2015-01-01 08:00:00 ending 2016-01-01 08:00:00 - (Fri Feb  5 16:25:17 2021)
+Edge Added: 72	Edge removed: 48
+Writing Communities (Fri Feb  5 16:25:17 2021)
+Writing actual graph status (Fri Feb  5 16:25:17 2021)
+Writing merging file (Fri Feb  5 16:25:17 2021)
+Merged communities: 0 (Fri Feb  5 16:25:17 2021)
+Total Communities 0 (Fri Feb  5 16:25:17 2021)
+
+Started Slice 4 (16:25:17.556512)

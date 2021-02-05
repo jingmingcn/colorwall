@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+<meta http-equiv="Cache-Control" content="no-store" />
+<title>Colorwall: an embedding temporal display solution</title>
+<link
+  rel="stylesheet"
+  type="text/css"
+  href="bootstrap-4.1.0-dist/css/bootstrap.min.css"
+/>
+<style type="text/css">
+  html body {
+    margin: 0;
+    padding: 0;
+    cursor: pointer;
+    background-color: #fff;
+    overflow: hidden;
+  }
+  .node {
+    /**fill: #2679B2;**/
+    stroke: white;
+    stroke-opacity: 0.8;
+  }
+  .link {
+    stroke-width: 1px;
+    stroke: #33a02c;
+    stroke-opacity: 0.5;
+    fill: none;
+  }
+
+  .rect1 {
+    display: none;
+  }
+
+  .area,
+  .area2 {
+    fill-opacity: 1;
+    stroke: #eee;
+    stroke-opacity: 0.1;
+    stroke-width: 0;
+  }
+  svg .svg_main {
+    position: absolute;
+    left: 0px;
+    top: 0px;
+  }
+
+  svg .svg_bottom {
+    position: absolute;
+    margin: 0;
+    padding: 0;
+  }
+
+  .label_ {
+    fill: #333;
+  }
+
+  .cell_ {
+    fill-opacity: 0.1;
+    stroke: #999;
+    stroke-width: 1px;
+  }
+
+  .label {
+    fill: #fff;
+    font-size: 6pt;
+  }
+
+  .showKeywordBtn {
+    font-size: 12px;
+    fill: #33a02c;
+  }
+
+  .bootbox.modal > .modal-dialog {
+    z-index: 99999 !important;
+  }
+
+  div.mytooltip {
+    position: absolute;
+    text-align: left;
+    width: 600px;
+    height: 60px;
+    padding: 2px;
+    font: 12px sans-serif;
+    background: lightsteelblue;
+    border: 0px;
+    border-radius: 8px;
+    pointer-events: none;
+  }
+
+  .treemapcell {
+    fill-opacity: 0.1;
+    stroke: #999;
+    stroke-width: 4px;
+  }
+
+  .voronoi {
+    stroke: #aaa;
+    stroke-width: 2px;
+  }
+</style>
+<script src="jstat.min.js"></script>
+<script src="math.min.js"></script>
+<script src="levenshteinDistance.js"></script>
+<script src="js/jquery-3.1.1.min.js" charset="utf-8"></script>
+<script src="js/d3.v3.min.js" charset="utf-8"></script>
+<script type="text/javascript" src="js/d3.v4.js"></script>
+<script type="text/javascript" src="js/d3-legend.js" charset="utf-8"></script>
+<script type="text/javascript" src="js/d3-scale-chromatic.v1.1.js"></script>
+
+<script type="text/javascript" src="js/dat.gui.js"></script>
+<script type="text/javascript" src="js/netClustering.js"></script>
+<script type="text/javascript" src="js/forceInABox.js"></script>
+<script type="text/javascript" src="js/colorbrewer.js"></script>
+<script type="text/javascript" src="js/colorbar.js"></script>
+<script type="text/javascript" src="js/dynamic-time-warping.min.js"></script>
+<script type="text/javascript" src="js/seedrandom.min.js"></script>
+<script
+  type="text/javascript"
+  src="bootstrap-4.1.0-dist/js/bootstrap.bundle.min.js"
+></script>
+<script type="text/javascript" src="js/bootbox.min.js"></script>
+<script
+  type="text/javascript"
+  src="fig3.brain.group.single.sample.js"
+  charset="utf-8"
+></script>
