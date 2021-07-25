@@ -69,7 +69,7 @@ com_dict = {}
 authors_ = []
 authors_count_ = []
 for i, v in enumerate(authors_count):
-    if v >= 8:
+    if v >= 12:
         authors_.append(authors[i])
         authors_count_.append(v)
 
